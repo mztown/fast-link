@@ -1,7 +1,7 @@
 {
   "name": "Auto Link",
-  "description": "自动将 40 字节 BT 哈希字符串转换为 magnet 链接、将 28 位字符串转换为百度网盘链接",
-  "version": "1.2",
+  "description": "在弹窗中粘贴 40 位 BT 哈希或 28 位百度网盘分享码，一键转换为对应链接",
+  "version": "2.0",
   "manifest_version": 3,
   "background": {
     "service_worker": "background.js"
@@ -13,11 +13,7 @@
   },
   "permissions": [
     "storage",
-    "declarativeNetRequest",
-    "declarativeNetRequestFeedback"
-  ],
-  "host_permissions": [
-    "<all_urls>"
+    "tabs"
   ],
   "action": {
     "default_popup": "hello.html",

@@ -101,7 +101,7 @@
   </head>
   <body>
     <h1>Auto Link 设置</h1>
-    <p class="subtitle">选择需要启用的自动跳转规则</p>
+    <p class="subtitle">选择需要启用的链接转换规则</p>
 
     <div class="rule">
       <div class="rule-head">
@@ -112,9 +112,8 @@
         </label>
       </div>
       <p class="rule-desc">
-        访问以 <code>40 位英文字母数字混合</code> 起始、后面是结束或
-        <code>&amp;</code> 的字符串时，自动在前面加上
-        <code>magnet:?xt=urn:btih:</code> 并跳转。
+        在弹窗中粘贴 <code>40 位英文字母数字混合</code> 字符串时，自动在前面加上
+        <code>magnet:?xt=urn:btih:</code> 并打开对应链接。
       </p>
     </div>
 
@@ -127,10 +126,10 @@
         </label>
       </div>
       <p class="rule-desc">
-        访问以 <code>28 位大小写英文/数字/减号混合</code> 起始、其中
-        <code>倒数第 5 位为 -</code>、后 4 位为英文数字的字符串时，自动在前面加上
+        在弹窗中粘贴 <code>28 位大小写英文/数字/减号混合</code> 字符串时（其中
+        <code>倒数第 5 位为 -</code>、后 4 位为英文数字），自动在前面加上
         <code>https://pan.baidu.com/s/</code>，并将倒数第 5 位的
-        <code>-</code> 替换为 <code>?pwd=</code> 后跳转。
+        <code>-</code> 替换为 <code>?pwd=</code> 后打开对应链接。
       </p>
     </div>
 
