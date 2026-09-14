@@ -1,32 +1,41 @@
-// 设置页面逻辑：读取并保存两个功能开关
+// 设置页面逻辑：读取并保存功能开关
 const DEFAULTS = {
   enableMagnet: true,
   enableBaidu: true,
+  enableFallbackSearch: false, // 兜底跳转百度搜索（当前暂停）
 };
 
-const enableMagnet = document.getElementById("enableMagnet");
-const enableBaidu = document.getElementById("enableBaidu");
+const SWITCH_KEYS = Object.keys(DEFAULTS);
+
+// 按 id 收集所有开关元素
+const switches = {};
+for (const key of SWITCH_KEYS) {
+  switches[key] = document.getElementById(key);
+}
 const saveStatus = document.getElementById("saveStatus");
 
 let saveTimer = null;
 
 // 加载已保存的配置
 chrome.storage.sync.get(DEFAULTS, (items) => {
-  enableMagnet.checked = items.enableMagnet;
-  enableBaidu.checked = items.enableBaidu;
+  for (const key of SWITCH_KEYS) {
+    switches[key].checked = !!items[key];
+  }
 });
 
 function persist() {
-  chrome.storage.sync.set(
-    { enableMagnet: enableMagnet.checked, enableBaidu: enableBaidu.checked },
-    () => {
-      saveStatus.classList.add("show");
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(() => saveStatus.classList.remove("show"), 1500);
-    }
-  );
+  const patch = {};
+  for (const key of SWITCH_KEYS) {
+    patch[key] = switches[key].checked;
+  }
+  chrome.storage.sync.set(patch, () => {
+    saveStatus.classList.add("show");
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => saveStatus.classList.remove("show"), 1500);
+  });
 }
 
 // 开关变化时立即保存
-enableMagnet.addEventListener("change", persist);
-enableBaidu.addEventListener("change", persist);
+for (const key of SWITCH_KEYS) {
+  switches[key].addEventListener("change", persist);
+}

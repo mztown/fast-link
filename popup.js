@@ -1,32 +1,12 @@
 // ============================================================
-// 弹窗逻辑：粘贴字符串 -> 转换并打开新标签页 + 功能开关
+// 弹窗逻辑：粘贴字符串 -> 转换并打开新标签页
+// 功能开关统一在设置页（options.html）中管理
 // ============================================================
-
-const DEFAULTS = {
-  enableMagnet: true,
-  enableBaidu: true,
-};
 
 const input = document.getElementById("input");
 const convertBtn = document.getElementById("convertBtn");
 const resultBox = document.getElementById("result");
-const enableMagnet = document.getElementById("enableMagnet");
-const enableBaidu = document.getElementById("enableBaidu");
 const openSettings = document.getElementById("openSettings");
-
-// 加载已保存的配置
-chrome.storage.sync.get(DEFAULTS, (items) => {
-  enableMagnet.checked = items.enableMagnet;
-  enableBaidu.checked = items.enableBaidu;
-});
-
-// 开关变化时保存
-enableMagnet.addEventListener("change", () => {
-  chrome.storage.sync.set({ enableMagnet: enableMagnet.checked });
-});
-enableBaidu.addEventListener("change", () => {
-  chrome.storage.sync.set({ enableBaidu: enableBaidu.checked });
-});
 
 // 打开完整设置页
 openSettings.addEventListener("click", () => {
@@ -59,7 +39,10 @@ convertBtn.addEventListener("click", () => {
     if (resp && resp.ok) {
       showResult("success", "已打开：\n" + resp.result.url);
     } else {
-      showResult("error", resp && resp.error ? resp.error : "无法识别该字符串格式");
+      showResult(
+        "error",
+        resp && resp.error ? resp.error : "无法识别该字符串格式"
+      );
     }
   });
 });

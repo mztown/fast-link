@@ -1,7 +1,7 @@
 {
   "name": "Auto Link",
-  "description": "在弹窗中粘贴 40 位 BT 哈希或 28 位百度网盘分享码，一键转换为对应链接",
-  "version": "2.0",
+  "description": "拦截 autolinreserved.publicvm.com?wd= 链接，将搜索词按规则转换为 magnet/百度网盘链接，否则跳转百度搜索",
+  "version": "2.2",
   "manifest_version": 3,
   "background": {
     "service_worker": "background.js"
@@ -13,7 +13,18 @@
   },
   "permissions": [
     "storage",
-    "tabs"
+    "tabs",
+    "declarativeNetRequestWithHostAccess",
+    "declarativeNetRequestFeedback"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["redirect.html", "redirect.js", "convert.js"],
+      "matches": ["<all_urls>"]
+    }
   ],
   "action": {
     "default_popup": "hello.html",
