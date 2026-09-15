@@ -68,9 +68,14 @@ function handleNavigation(details) {
   // 2) 未命中 -> 兜底跳转
   if (!settings.enableFallbackSearch) return;
 
+  // 默认搜索引擎 = 搜索引擎列表的第 0 项
+  const defaultEngine = Array.isArray(settings.searchEngines)
+    ? settings.searchEngines[0]
+    : "";
+
   // 2a) 自定义搜索引擎
   if (settings.isDefaultSE) {
-    const target = applyKeywordTemplate(settings.searchTemplate, keyword);
+    const target = applyKeywordTemplate(defaultEngine, keyword);
     if (target) chrome.tabs.update(details.tabId, { url: target });
     return;
   }
@@ -85,9 +90,9 @@ function handleNavigation(details) {
     }
   }
 
-  // 2c) 回退到自定义模板
-  const target = applyKeywordTemplate(settings.searchTemplate, keyword);
-  if (target) chrome.tabs.update(details.tabId, { url: target });
+  // 2c) 回退到默认搜索引擎模板
+  const fallback = applyKeywordTemplate(defaultEngine, keyword);
+  if (fallback) chrome.tabs.update(details.tabId, { url: fallback });
 }
 
 chrome.webNavigation.onBeforeNavigate.addListener(handleNavigation, {

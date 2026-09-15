@@ -14,7 +14,7 @@
 | 配置项 | 作用 | 默认值 |
 | --- | --- | --- |
 | `matchTemplate` | 拦截地址模板 | `https://autolinreserved.publicvm.com/?wd=$s` |
-| `searchTemplate` | 兜底搜索引擎模板 | `https://cn.bing.com/search?q=$s` |
+| `searchEngines` | 搜索引擎有序列表（第 0 项为默认搜索引擎） | `["https://cn.bing.com/search?q=$s"]` |
 | `isDefaultSE` | 自定义搜索引擎开关 | `false` |
 | `isDefalutSEDisabled` | 上项开关是否禁用（检测到 `autolinkdefault=true` 后自动置为 `false`） | `true` |
 
@@ -65,10 +65,10 @@
 
 2. **兜底跳转**
    未命中转换规则时，若「兜底跳转搜索引擎」开启：
-   - `isDefaultSE = true` → 使用 `searchTemplate`（自定义搜索引擎）
+   - `isDefaultSE = true` → 使用列表第 0 项（自定义搜索引擎）
    - `isDefaultSE = false` → 使用 `chrome.search.query()` 走浏览器默认搜索引擎
 
-   （`chrome.search` 不可用时会自动回退到 `searchTemplate`）
+   （`chrome.search` 不可用时会自动回退到列表第 0 项）
 
 ### 为什么不用 declarativeNetRequest
 
@@ -102,7 +102,7 @@
 ### 其他
 
 - 手动转换复用同一套 `convert.js`，弹窗经 `chrome.runtime.onMessage` 调用，由 `chrome.tabs.create()` 打开。
-- 所有配置（`matchTemplate`、`searchTemplate`、各开关）通过 `chrome.storage.sync` 持久化；
+- 所有配置（`matchTemplate`、`searchEngines`、各开关）通过 `chrome.storage.sync` 持久化；
   拦截模板变更后实时重建 DNR 规则。
 
 ## 项目结构

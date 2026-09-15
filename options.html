@@ -190,6 +190,105 @@
         line-height: 1.5;
         vertical-align: middle;
       }
+      /* 搜索引擎列表 */
+      .se-input-row {
+        display: flex;
+        gap: 6px;
+        align-items: stretch;
+        margin-top: 8px;
+      }
+      .se-input-row .text-input {
+        flex: 1;
+        width: auto;
+        margin-top: 0;
+      }
+      .icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #fff;
+        color: #64748b;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      .icon-btn:hover {
+        background: #f1f5f9;
+        color: #334155;
+      }
+      .icon-btn svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .se-list {
+        display: none;
+        margin-top: 8px;
+        border: 1px solid #e5e5e5;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .se-list.open {
+        display: block;
+      }
+      .se-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        font-size: 12px;
+        border-bottom: 1px solid #f1f5f9;
+      }
+      .se-row:last-child {
+        border-bottom: none;
+      }
+      .se-label {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #334155;
+        cursor: text;
+      }
+      .se-label:hover {
+        color: #1d4ed8;
+        text-decoration: underline;
+      }
+      .se-actions {
+        display: flex;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .se-actions .icon-btn {
+        width: 24px;
+        height: 24px;
+      }
+      .se-actions .icon-btn svg {
+        width: 13px;
+        height: 13px;
+      }
+      .se-edit-input {
+        flex: 1;
+        min-width: 0;
+        padding: 3px 6px;
+        font-size: 12px;
+        font-family: inherit;
+        border: 1px solid #2563eb;
+        border-radius: 4px;
+        outline: none;
+      }
+      .se-add-row {
+        justify-content: center;
+      }
       /* Switch */
       .switch {
         position: relative;
@@ -345,12 +444,21 @@
                 ><span class="promo-tag">推广</span
                 >加入微软积分商城，获取购物、电影、加油权益</a
               >
-              <input
-                type="text"
-                id="searchTemplate"
-                class="text-input"
-                placeholder="https://cn.bing.com/search?q=$s"
-              />
+              <div class="se-input-row">
+                <input
+                  type="text"
+                  id="searchTemplate"
+                  class="text-input"
+                  placeholder="https://cn.bing.com/search?q=$s"
+                />
+                <button
+                  type="button"
+                  class="icon-btn"
+                  id="seToggle"
+                  title="展开列表"
+                ></button>
+              </div>
+              <div class="se-list" id="seList"></div>
               <div class="hint" id="searchHint"></div>
             </div>
 

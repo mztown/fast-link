@@ -1,4 +1,4 @@
-// 设置页面逻辑：读取并保存开关与各类模板
+// 设置页面逻辑：开关 + 拦截地址模板 + 搜索引擎有序列表
 // DEFAULTS 来自 convert.js（已在本页 <script> 中引入）
 
 const SWITCH_KEYS = ["enableMagnet", "enableBaidu", "enableFallbackSearch"];
@@ -15,10 +15,21 @@ const isDefaultSE = document.getElementById("isDefaultSE");
 const saveStatus = document.getElementById("saveStatus");
 const addAsSearchEngine = document.getElementById("addAsSearchEngine");
 const seGuide = document.getElementById("seGuide");
+const seToggle = document.getElementById("seToggle");
+const seList = document.getElementById("seList");
+const searchInput = document.getElementById("searchTemplate");
+const searchHint = document.getElementById("searchHint");
+const bingRewards = document.getElementById("bingRewards");
+
+const MATCH_EXAMPLE = "https://example.com/?wd=$s";
+const SEARCH_EXAMPLE = "https://cn.bing.com/search?q=$s";
 
 let saveTimer = null;
+let engines = []; // 搜索引擎有序列表，[0] 即默认搜索引擎
 
-// 底部 toast（复用「已保存」提示条）
+// ============================================================
+// 通用
+// ============================================================
 function flashToast(text) {
   saveStatus.textContent = text || "已保存";
   saveStatus.classList.add("show");
@@ -33,8 +44,7 @@ function flashSaved() {
   flashToast("已保存");
 }
 
-// 右栏整体：仅在「兜底跳转搜索引擎」开启时展开
-// 用 collapsed 类驱动宽度折叠 + 内容平移的动画
+// 右栏整体：仅在「地址栏搜索」开启时展开
 function updateTemplateVisibility() {
   templateCard.classList.toggle(
     "collapsed",
@@ -47,47 +57,191 @@ function updateSearchEngineVisibility() {
   searchEngineCard.style.display = isDefaultSE.checked ? "" : "none";
 }
 
-// 模板输入通用绑定：失焦或回车时保存，校验必须含 $s
-function bindTemplateInput(inputId, hintId, key, example) {
-  const input = document.getElementById(inputId);
-  const hint = document.getElementById(hintId);
-  input.addEventListener("change", () => {
-    const value = input.value.trim();
-    if (!value.includes("$s")) {
-      hint.textContent = "模板必须包含 $s 占位符，例如 " + example;
-      hint.className = "hint error";
-      return;
-    }
-    hint.textContent = "";
-    hint.className = "hint";
-    chrome.storage.sync.set({ [key]: value }, flashSaved);
-  });
-  return input;
+// 校验模板必须包含 $s；通过返回去除空白后的值，否则返回 null
+function checkTemplate(input, hint, example) {
+  const value = input.value.trim();
+  if (!value.includes("$s")) {
+    hint.textContent = "模板必须包含 $s 占位符，例如 " + example;
+    hint.className = "hint error";
+    return null;
+  }
+  hint.textContent = "";
+  hint.className = "hint";
+  return value;
 }
 
-const templateInput = bindTemplateInput(
-  "matchTemplate",
-  "templateHint",
-  "matchTemplate",
-  "https://example.com/?wd=$s"
-);
-const searchInput = bindTemplateInput(
-  "searchTemplate",
-  "searchHint",
-  "searchTemplate",
-  "https://cn.bing.com/search?q=$s"
-);
+// ============================================================
+// 拦截地址模板
+// ============================================================
+const templateInput = document.getElementById("matchTemplate");
+const templateHint = document.getElementById("templateHint");
 
-// Bing 积分商城推广链接：仅当兜底搜索引擎为 bing.com 时显示
-const bingRewards = document.getElementById("bingRewards");
+templateInput.addEventListener("change", () => {
+  const value = checkTemplate(templateInput, templateHint, MATCH_EXAMPLE);
+  if (value === null) return;
+  chrome.storage.sync.set({ matchTemplate: value }, flashSaved);
+});
 
+// ============================================================
+// 搜索引擎有序列表
+// ============================================================
+const ICONS = {
+  down: '<path d="M6 9l6 6 6-6"/>',
+  up: '<path d="M6 15l6-6 6 6"/>',
+  pin: '<path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>',
+  trash:
+    '<path d="M4 7h16"/><path d="M6 7l1 12h10l1-12"/><path d="M9 7V4h6v3"/>',
+  plus: '<path d="M12 5v14"/><path d="M5 12h14"/>',
+};
+
+function iconSvg(name) {
+  return '<svg viewBox="0 0 24 24">' + ICONS[name] + "</svg>";
+}
+
+function makeIconButton(icon, title, onClick) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "icon-btn";
+  btn.title = title;
+  btn.innerHTML = iconSvg(icon);
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    onClick();
+  });
+  return btn;
+}
+
+// Bing 积分商城推广链接：仅当默认搜索引擎为 bing.com 时显示
 function updateBingPromo() {
   const tpl = (searchInput.value || "").toLowerCase();
   bingRewards.style.display = tpl.includes("bing.com") ? "block" : "none";
 }
 
-// 输入时实时判断
-searchInput.addEventListener("input", updateBingPromo);
+// 顶部输入框始终显示默认搜索引擎（engines[0]）
+function syncDefaultEngine() {
+  searchInput.value = engines[0] || "";
+  updateBingPromo();
+}
+
+function saveEngines() {
+  chrome.storage.sync.set({ searchEngines: engines.slice() }, flashSaved);
+}
+
+function renderEngines() {
+  seList.innerHTML = "";
+
+  engines.forEach((val, index) => {
+    const row = document.createElement("div");
+    row.className = "se-row";
+
+    const label = document.createElement("span");
+    label.className = "se-label";
+    label.textContent = val || "(空)";
+    label.title = val;
+    label.addEventListener("click", () => startEdit(row, index));
+    row.appendChild(label);
+
+    const actions = document.createElement("div");
+    actions.className = "se-actions";
+
+    // 第一行已是默认，无需置顶按钮
+    if (index > 0) {
+      actions.appendChild(
+        makeIconButton("pin", "置顶（设为默认搜索引擎）", () => pinToTop(index))
+      );
+    }
+    actions.appendChild(
+      makeIconButton("trash", "删除", () => removeEngine(index))
+    );
+
+    row.appendChild(actions);
+    seList.appendChild(row);
+  });
+
+  // 最后一行：添加按钮
+  const addRow = document.createElement("div");
+  addRow.className = "se-row se-add-row";
+  addRow.appendChild(makeIconButton("plus", "添加", addEngine));
+  seList.appendChild(addRow);
+}
+
+// 点击 label -> 变为可编辑文本框；失焦后保存并变回 label
+function startEdit(row, index) {
+  const label = row.querySelector(".se-label");
+  if (!label) return;
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "se-edit-input";
+  input.value = engines[index];
+  row.replaceChild(input, label);
+  input.focus();
+  input.select();
+
+  let finished = false;
+  const commit = () => {
+    if (finished) return;
+    finished = true;
+    engines[index] = input.value.trim();
+    saveEngines();
+    renderEngines();
+    if (index === 0) syncDefaultEngine();
+  };
+
+  input.addEventListener("blur", commit);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      input.blur();
+    } else if (e.key === "Escape") {
+      finished = true; // 放弃本次修改
+      renderEngines();
+    }
+  });
+}
+
+function pinToTop(index) {
+  const [item] = engines.splice(index, 1);
+  engines.unshift(item);
+  saveEngines();
+  renderEngines();
+  syncDefaultEngine();
+}
+
+function removeEngine(index) {
+  engines.splice(index, 1);
+  saveEngines();
+  renderEngines();
+  syncDefaultEngine();
+}
+
+function addEngine() {
+  engines.push("");
+  renderEngines();
+  const rows = seList.querySelectorAll(".se-row:not(.se-add-row)");
+  const newRow = rows[rows.length - 1];
+  if (newRow) startEdit(newRow, engines.length - 1);
+}
+
+// 下拉 / 收起
+function toggleList() {
+  const open = seList.classList.toggle("open");
+  seToggle.innerHTML = iconSvg(open ? "up" : "down");
+  seToggle.title = open ? "收起列表" : "展开列表";
+}
+
+seToggle.addEventListener("click", toggleList);
+seToggle.innerHTML = iconSvg("down"); // 初始为「下拉」图标
+
+// 顶部输入框即默认搜索引擎（engines[0]），编辑后回写列表
+searchInput.addEventListener("change", () => {
+  const value = checkTemplate(searchInput, searchHint, SEARCH_EXAMPLE);
+  if (value === null) return;
+  engines[0] = value;
+  saveEngines();
+  renderEngines();
+  updateBingPromo();
+});
 
 // ============================================================
 // 添加为浏览器搜索引擎
@@ -219,13 +373,24 @@ seGuide.addEventListener("click", (e) => {
 // ============================================================
 // 加载已保存的配置
 // ============================================================
-chrome.storage.sync.get(DEFAULTS, (items) => {
+chrome.storage.sync.get(null, (all) => {
+  const items = { ...DEFAULTS, ...all };
+
   for (const key of SWITCH_KEYS) {
     switches[key].checked = !!items[key];
   }
   templateInput.value = items.matchTemplate || "";
-  searchInput.value = items.searchTemplate || "";
-  updateBingPromo();
+
+  // 搜索引擎列表：优先 searchEngines，其次从旧的 searchTemplate 迁移
+  if (Array.isArray(all.searchEngines) && all.searchEngines.length) {
+    engines = all.searchEngines.slice();
+  } else if (all.searchTemplate) {
+    engines = [all.searchTemplate];
+  } else {
+    engines = DEFAULTS.searchEngines.slice();
+  }
+  renderEngines();
+  syncDefaultEngine();
 
   // 自定义搜索引擎：由 isDefaultSE 决定开关状态，
   // 由 isDefalutSEDisabled 决定是否禁用

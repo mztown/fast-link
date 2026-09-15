@@ -8,7 +8,8 @@
 // searchTemplate：兜底搜索引擎模板，用 $s 表示搜索词位置
 const DEFAULTS = {
   matchTemplate: "https://autolinreserved.publicvm.com/?wd=$s",
-  searchTemplate: "https://cn.bing.com/search?q=$s",
+  // 有序的搜索引擎列表，第 0 项即「默认搜索引擎」
+  searchEngines: ["https://cn.bing.com/search?q=$s"],
   enableMagnet: true,
   enableBaidu: true,
   enableFallbackSearch: true, // 兜底跳转搜索（默认开启）
