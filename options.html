@@ -6,19 +6,33 @@
     <style>
       body {
         font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
-        max-width: 480px;
-        margin: 32px auto;
-        padding: 0 20px;
+        margin: 0;
+        padding: 32px 20px;
         color: #222;
       }
       h1 {
         font-size: 20px;
         margin: 0 0 4px;
+        text-align: center;
       }
       .subtitle {
         color: #888;
         font-size: 13px;
-        margin: 0 0 24px;
+        margin: 0;
+        text-align: center;
+      }
+      /* 两栏布局：整体居中，右栏隐藏时左栏自动居中 */
+      .layout {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 24px;
+        margin-top: 28px;
+      }
+      .col {
+        width: 400px;
+        flex-shrink: 0;
       }
       .rule {
         border: 1px solid #e5e5e5;
@@ -114,6 +128,7 @@
         font-size: 13px;
         color: #16a34a;
         min-height: 20px;
+        text-align: center;
         opacity: 0;
         transition: opacity 0.3s;
       }
@@ -126,70 +141,78 @@
     <h1>Auto Link 设置</h1>
     <p class="subtitle">配置各转换规则与拦截地址</p>
 
-    <div class="rule">
-      <div class="rule-head">
-        <span class="rule-title">Magnet 链接转换</span>
-        <label class="switch">
-          <input type="checkbox" id="enableMagnet" />
-          <span class="slider"></span>
-        </label>
-      </div>
-      <p class="rule-desc">
-        当搜索词为 <code>40 位英文字母数字混合</code>，或在弹窗中粘贴该字符串时，
-        自动在前面加上 <code>magnet:?xt=urn:btih:</code> 并跳转。
-        <strong>关闭后该功能不生效</strong>。
-      </p>
-    </div>
+    <div class="layout">
+      <!-- 左栏：各转换规则开关 -->
+      <div class="col">
+        <div class="rule">
+          <div class="rule-head">
+            <span class="rule-title">Magnet 链接转换</span>
+            <label class="switch">
+              <input type="checkbox" id="enableMagnet" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <p class="rule-desc">
+            当搜索词为 <code>40 位英文字母数字混合</code>，或在弹窗中粘贴该字符串时，
+            自动在前面加上 <code>magnet:?xt=urn:btih:</code> 并跳转。
+            <strong>关闭后该功能不生效</strong>。
+          </p>
+        </div>
 
-    <div class="rule">
-      <div class="rule-head">
-        <span class="rule-title">百度网盘链接转换</span>
-        <label class="switch">
-          <input type="checkbox" id="enableBaidu" />
-          <span class="slider"></span>
-        </label>
-      </div>
-      <p class="rule-desc">
-        当搜索词为 <code>28 位大小写英文/数字/减号混合</code>（其中
-        <code>倒数第 5 位为 -</code>、后 4 位为英文数字），或在弹窗中粘贴该字符串时，
-        自动在前面加上 <code>https://pan.baidu.com/s/</code>，并将倒数第 5 位的
-        <code>-</code> 替换为 <code>?pwd=</code> 后跳转。
-        <strong>关闭后该功能不生效</strong>。
-      </p>
-    </div>
+        <div class="rule">
+          <div class="rule-head">
+            <span class="rule-title">百度网盘链接转换</span>
+            <label class="switch">
+              <input type="checkbox" id="enableBaidu" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <p class="rule-desc">
+            当搜索词为 <code>28 位大小写英文/数字/减号混合</code>（其中
+            <code>倒数第 5 位为 -</code>、后 4 位为英文数字），或在弹窗中粘贴该字符串时，
+            自动在前面加上 <code>https://pan.baidu.com/s/</code>，并将倒数第 5 位的
+            <code>-</code> 替换为 <code>?pwd=</code> 后跳转。
+            <strong>关闭后该功能不生效</strong>。
+          </p>
+        </div>
 
-    <div class="rule">
-      <div class="rule-head">
-        <span class="rule-title">兜底跳转百度搜索</span>
-        <label class="switch">
-          <input type="checkbox" id="enableFallbackSearch" />
-          <span class="slider"></span>
-        </label>
+        <div class="rule">
+          <div class="rule-head">
+            <span class="rule-title">兜底跳转百度搜索</span>
+            <label class="switch">
+              <input type="checkbox" id="enableFallbackSearch" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <p class="rule-desc">
+            当搜索词<strong>不符合</strong>上述两种格式时，跳转到
+            <code>https://www.baidu.com/s?wd=搜索词</code>。
+            <strong>当前默认开启</strong>。关闭时，未匹配的搜索词会在中间页停下并提示，
+            不做任何跳转。
+          </p>
+        </div>
       </div>
-      <p class="rule-desc">
-        当搜索词<strong>不符合</strong>上述两种格式时，跳转到
-        <code>https://www.baidu.com/s?wd=搜索词</code>。
-        <strong>当前默认开启</strong>。关闭时，未匹配的搜索词会在中间页停下并提示，
-        不做任何跳转。
-      </p>
-    </div>
 
-    <div class="rule" id="templateCard">
-      <div class="rule-head">
-        <span class="rule-title">拦截地址模板</span>
+      <!-- 右栏：拦截地址模板（仅兜底开启时显示） -->
+      <div class="col" id="templateCard">
+        <div class="rule">
+          <div class="rule-head">
+            <span class="rule-title">拦截地址模板</span>
+          </div>
+          <p class="rule-desc">
+            用 <code>$s</code> 表示搜索词的位置。扩展会拦截匹配该模板的链接，
+            把 <code>$s</code> 处的内容交由中间页判断：命中上述规则则跳转对应链接，
+            否则跳转百度搜索（由「兜底跳转百度搜索」开关控制）。
+          </p>
+          <input
+            type="text"
+            id="matchTemplate"
+            class="text-input"
+            placeholder="https://example.com/?wd=$s"
+          />
+          <div class="hint" id="templateHint"></div>
+        </div>
       </div>
-      <p class="rule-desc">
-        用 <code>$s</code> 表示搜索词的位置。扩展会拦截匹配该模板的链接，
-        把 <code>$s</code> 处的内容交由中间页判断：命中上述规则则跳转对应链接，
-        否则跳转百度搜索（由「兜底跳转百度搜索」开关控制）。
-      </p>
-      <input
-        type="text"
-        id="matchTemplate"
-        class="text-input"
-        placeholder="https://example.com/?wd=$s"
-      />
-      <div class="hint" id="templateHint"></div>
     </div>
 
     <div class="save-status" id="saveStatus">已保存</div>
