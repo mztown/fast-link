@@ -192,6 +192,26 @@
         line-height: 1.5;
         vertical-align: middle;
       }
+      /* 「默认搜索引擎」卡片：从「自定义搜索引擎」下方滑动展开 / 收起，
+         时长与缓动与右栏动画保持一致 */
+      .se-collapse {
+        display: grid;
+        grid-template-rows: 1fr;
+        overflow: hidden;
+        transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .se-collapse.collapsed {
+        grid-template-rows: 0fr;
+      }
+      .se-collapse-inner {
+        min-height: 0;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+          opacity 0.4s ease;
+      }
+      .se-collapse.collapsed .se-collapse-inner {
+        transform: translateY(-100%); /* 向上缩回，视觉上从上方滑出 */
+        opacity: 0;
+      }
       /* 搜索引擎列表 */
       .se-input-row {
         display: flex;
@@ -231,15 +251,31 @@
         stroke-linecap: round;
         stroke-linejoin: round;
       }
+      /* 搜索引擎列表：展开 / 收起带滑动动画（与右栏动画参数一致） */
       .se-list {
-        display: none;
-        margin-top: 8px;
-        border: 1px solid #e5e5e5;
+        display: grid;
+        grid-template-rows: 0fr;
+        margin-top: 0;
+        border: 1px solid transparent;
         border-radius: 6px;
         overflow: hidden;
+        transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+          margin-top 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+          border-color 0.4s ease;
       }
       .se-list.open {
-        display: block;
+        grid-template-rows: 1fr;
+        margin-top: 8px;
+        border-color: #e5e5e5;
+      }
+      .se-list-inner {
+        min-height: 0;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+          opacity 0.4s ease;
+      }
+      .se-list:not(.open) .se-list-inner {
+        transform: translateY(-100%); /* 向上缩回，视觉上从上方滑出 */
+        opacity: 0;
       }
       .se-row {
         display: flex;
@@ -505,40 +541,46 @@
               </p>
             </div>
 
-            <div class="rule" id="searchEngineCard">
-              <div class="rule-head">
-                <span class="rule-title">默认搜索引擎</span>
+            <div class="se-collapse" id="searchEngineCard">
+              <div class="se-collapse-inner">
+                <div class="rule">
+                  <div class="rule-head">
+                    <span class="rule-title">默认搜索引擎</span>
+                  </div>
+                  <p class="rule-desc">
+                    未匹配上述规则时跳转的搜索引擎地址，用 <code>$s</code> 表示搜索词位置。
+                  </p>
+                  <a
+                    class="bing-promo"
+                    id="bingRewards"
+                    href="https://rewards.bing.com/welcome?rh=VTo34eLDLJ8&amp;ref=rafsrchae"
+                    target="_blank"
+                    rel="noopener"
+                    title="推广链接：含推荐码，你通过它注册后作者可能获得收益"
+                    style="display: none"
+                    ><span class="promo-tag">推广</span
+                    >加入微软积分商城，获取购物、电影、加油权益</a
+                  >
+                  <div class="se-input-row">
+                    <input
+                      type="text"
+                      id="searchTemplate"
+                      class="text-input"
+                      placeholder="https://cn.bing.com/search?q=$s"
+                    />
+                    <button
+                      type="button"
+                      class="icon-btn"
+                      id="seToggle"
+                      title="展开列表"
+                    ></button>
+                  </div>
+                  <div class="se-list" id="seList">
+                    <div class="se-list-inner" id="seListInner"></div>
+                  </div>
+                  <div class="hint" id="searchHint"></div>
+                </div>
               </div>
-              <p class="rule-desc">
-                未匹配上述规则时跳转的搜索引擎地址，用 <code>$s</code> 表示搜索词位置。
-              </p>
-              <a
-                class="bing-promo"
-                id="bingRewards"
-                href="https://rewards.bing.com/welcome?rh=VTo34eLDLJ8&amp;ref=rafsrchae"
-                target="_blank"
-                rel="noopener"
-                title="推广链接：含推荐码，你通过它注册后作者可能获得收益"
-                style="display: none"
-                ><span class="promo-tag">推广</span
-                >加入微软积分商城，获取购物、电影、加油权益</a
-              >
-              <div class="se-input-row">
-                <input
-                  type="text"
-                  id="searchTemplate"
-                  class="text-input"
-                  placeholder="https://cn.bing.com/search?q=$s"
-                />
-                <button
-                  type="button"
-                  class="icon-btn"
-                  id="seToggle"
-                  title="展开列表"
-                ></button>
-              </div>
-              <div class="se-list" id="seList"></div>
-              <div class="hint" id="searchHint"></div>
             </div>
 
             <div class="rule">

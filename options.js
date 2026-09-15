@@ -17,6 +17,7 @@ const addAsSearchEngine = document.getElementById("addAsSearchEngine");
 const seGuide = document.getElementById("seGuide");
 const seToggle = document.getElementById("seToggle");
 const seList = document.getElementById("seList");
+const seListInner = document.getElementById("seListInner");
 const searchInput = document.getElementById("searchTemplate");
 const searchHint = document.getElementById("searchHint");
 const bingRewards = document.getElementById("bingRewards");
@@ -90,9 +91,10 @@ function updateTemplateVisibility() {
   );
 }
 
-// 「兜底搜索引擎」卡片：仅在「自定义搜索引擎」开启时显示
+// 「默认搜索引擎」卡片：仅在「自定义搜索引擎」开启时展开
+// 用 collapsed 类驱动「从上方滑动展开」动画（与右栏动画参数一致）
 function updateSearchEngineVisibility() {
-  searchEngineCard.style.display = isDefaultSE.checked ? "" : "none";
+  searchEngineCard.classList.toggle("collapsed", !isDefaultSE.checked);
 }
 
 // 校验模板必须包含 $s；通过返回去除空白后的值，否则返回 null
@@ -166,7 +168,7 @@ function saveEngines() {
 }
 
 function renderEngines() {
-  seList.innerHTML = "";
+  seListInner.innerHTML = "";
 
   engines.forEach((val, index) => {
     const row = document.createElement("div");
@@ -193,14 +195,14 @@ function renderEngines() {
     );
 
     row.appendChild(actions);
-    seList.appendChild(row);
+    seListInner.appendChild(row);
   });
 
   // 最后一行：添加按钮
   const addRow = document.createElement("div");
   addRow.className = "se-row se-add-row";
   addRow.appendChild(makeIconButton("plus", "添加", addEngine));
-  seList.appendChild(addRow);
+  seListInner.appendChild(addRow);
 }
 
 // 点击 label -> 变为可编辑文本框；失焦后保存并变回 label
@@ -286,7 +288,7 @@ function removeEngine(index) {
 function addEngine() {
   engines.push("");
   renderEngines();
-  const rows = seList.querySelectorAll(".se-row:not(.se-add-row)");
+  const rows = seListInner.querySelectorAll(".se-row:not(.se-add-row)");
   const newRow = rows[rows.length - 1];
   if (newRow) startEdit(newRow, engines.length - 1);
 }
@@ -464,10 +466,10 @@ chrome.storage.sync.get(null, (all) => {
   // 由 isDefalutSEDisabled 决定是否禁用
   isDefaultSE.checked = !!items.isDefaultSE;
   isDefaultSE.disabled = !!items.isDefalutSEDisabled;
-  updateSearchEngineVisibility();
 
   // 初始定位不播放动画：先禁用过渡，定位后再恢复
   document.body.classList.add("no-anim");
+  updateSearchEngineVisibility();
   updateTemplateVisibility();
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
