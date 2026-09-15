@@ -1,10 +1,20 @@
 // ============================================================
-// 共享转换逻辑（供 background.js / redirect.js 使用）
-// 说明：这里使用 JS 原生正则（V8 引擎），没有 DNR 的 2KB 限制，
-// 可以放心使用 {n} 定长量词。
+// 共享配置与转换逻辑
+// 供 background.js（importScripts）与各页面 <script> 引入使用
 // ============================================================
 
-// 转换规则：按顺序尝试
+// 配置项默认值（存储在 chrome.storage.sync）
+// matchTemplate：拦截地址模板，用 $s 表示搜索词位置
+const DEFAULTS = {
+  matchTemplate: "https://autolinreserved.publicvm.com/?wd=$s",
+  enableMagnet: true,
+  enableBaidu: true,
+  enableFallbackSearch: true, // 兜底跳转百度搜索（默认开启）
+};
+
+// ============================================================
+// 转换规则（使用 JS 原生正则，无 DNR 的 2KB 限制）
+// ============================================================
 const CONVERT_RULES = [
   {
     name: "baidu",
@@ -28,8 +38,7 @@ function sanitize(raw) {
   return s;
 }
 
-// 尝试转换为目标链接
-// 返回 { type, url } 或 null
+// 尝试转换为目标链接，返回 { type, url } 或 null
 function convert(raw) {
   const s = sanitize(raw);
   if (!s) return null;
@@ -38,4 +47,29 @@ function convert(raw) {
     if (m) return { type: rule.name, url: rule.build(m) };
   }
   return null;
+}
+
+// ============================================================
+// 把拦截模板转换为 DNR 正则
+// 例：https://a.com/?wd=$s  ->  ^https?://a\.com/\?wd=(.*)$
+// 返回 null 表示模板无效（缺少 $s）
+// ============================================================
+function templateToRegex(template) {
+  if (typeof template !== "string" || template.indexOf("$s") === -1) {
+    return null;
+  }
+  const idx = template.indexOf("$s");
+  const prefix = template.slice(0, idx);
+  const suffix = template.slice(idx + 2);
+
+  // 正则特殊字符转义
+  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  let pre = esc(prefix);
+  // 让 http 与 https 都能匹配
+  pre = pre.replace(/^https?:\/\//, "https?://");
+
+  const post = esc(suffix);
+
+  return "^" + pre + "(.*)" + post + "$";
 }

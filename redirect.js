@@ -1,13 +1,8 @@
 // ============================================================
 // 中间页逻辑：读取 wd 搜索词，判断后跳转
 // 运行在扩展页面上下文中，可直接访问 chrome.storage
+// DEFAULTS 与 convert() 均来自 convert.js（已在 HTML 中先引入）
 // ============================================================
-
-const DEFAULTS = {
-  enableMagnet: true,
-  enableBaidu: true,
-  enableFallbackSearch: false, // 兜底跳转百度搜索（当前暂停）
-};
 
 const msgEl = document.getElementById("msg");
 

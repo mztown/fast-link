@@ -1,25 +1,17 @@
 // ============================================================
-// Auto Link：地址拦截（经中间页判断）+ 弹窗手动转换
+// Auto Link：按可配置模板拦截地址（经中间页判断）+ 弹窗手动转换
 // ============================================================
-// 为什么不用 DNR 正则直接完成判断？
-// Chrome DNR 的 regexFilter 使用 RE2，有 2KB 编译内存限制。本环境下
-// 连 (.{23})-(.{4}) 这类含 {n} 有界量词的正则都会 memoryLimitExceeded，
-// 因此无法用 DNR 正则做「定长提取 + 分支 + 拼接」。
+// 拦截规则由设置页配置的「拦截地址模板」决定，模板中的 $s 表示搜索词位置，
+// 默认：https://autolinreserved.publicvm.com/?wd=$s
 //
-// 现方案：DNR 只做最简单的拦截与转发，把 wd 参数原样带给扩展中间页，
-// 由中间页的 JS（无 2KB 限制）完成判断与跳转：
-//   访问 publicvm.com/?wd=xxx
-//     -> DNR 正则 (.*) 拦截
-//     -> 重定向到 chrome-extension://<id>/redirect.html?wd=xxx
-//     -> redirect.js 调用 convert() 判断后跳转
+// 为什么经中间页判断？
+// Chrome DNR 的 regexFilter 基于 RE2，单条正则编译后不得超过 2KB。
+// 实测本环境下所有含 {n} 有界量词的正则（如 (.{23})-(.{4})）都会
+// memoryLimitExceeded，无法用 DNR 正则做「定长提取 + 分支」。
+// 因此 DNR 只负责最简拦截与转发，判断逻辑交给中间页 JS。
 
 importScripts("convert.js");
 
-const DEFAULTS = {
-  enableMagnet: true,
-  enableBaidu: true,
-  enableFallbackSearch: false, // 兜底跳转百度搜索（当前暂停）
-};
 let settings = { ...DEFAULTS };
 
 const RULE_ID = 1;
@@ -27,52 +19,70 @@ const RULE_ID = 1;
 // 扩展根地址，如 chrome-extension://abcdefg
 const EXT_ORIGIN = chrome.runtime.getURL("").replace(/\/$/, "");
 
-// DNR 规则：拦截目标地址，转发到中间页并带上 wd
-// 正则使用无界量词 (.*)，必然可编译通过
-const REDIRECT_RULE = {
-  id: RULE_ID,
-  priority: 1,
-  action: {
-    type: "redirect",
-    redirect: {
-      regexSubstitution: EXT_ORIGIN + "/redirect.html?wd=\\1",
-    },
-  },
-  condition: {
-    regexFilter: "^https?://autolinreserved\\.publicvm\\.com/?\\?wd=(.*)$",
-    resourceTypes: ["main_frame"],
-  },
-};
+// 串行化：避免 storage.get 回调与 storage.onChanged 并发调用
+// 造成 "Rule with id 1 does not have a unique ID" 冲突
+let updateChain = Promise.resolve();
 
-async function updateRules() {
-  try {
-    // 先清除全部历史动态规则，避免旧规则残留
-    const existing = await chrome.declarativeNetRequest.getDynamicRules();
-    const ids = existing.map((r) => r.id);
-    if (ids.length > 0) {
-      await chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: ids,
-      });
-      console.log("[Auto Link] 已清除历史规则：", ids);
-    }
-
-    // 校验拦截正则（应始终通过）
-    const check = await chrome.declarativeNetRequest.isRegexSupported({
-      regex: REDIRECT_RULE.condition.regexFilter,
-    });
-    if (!check.isSupported) {
-      console.error("[Auto Link] 拦截正则无法编译：", check.reason);
-      return;
-    }
-
-    await chrome.declarativeNetRequest.updateDynamicRules({
-      addRules: [REDIRECT_RULE],
-    });
-    console.log("[Auto Link] 拦截规则已注册：", REDIRECT_RULE.condition.regexFilter);
-    console.log("[Auto Link] 中间页地址：", EXT_ORIGIN + "/redirect.html");
-  } catch (err) {
+function updateRules() {
+  updateChain = updateChain.then(applyRules).catch((err) => {
     console.error("[Auto Link] 更新 DNR 规则失败：", err);
+  });
+  return updateChain;
+}
+
+async function applyRules() {
+  // 需要清除的规则 id：所有已存在的 + 本规则 id
+  const existing = await chrome.declarativeNetRequest.getDynamicRules();
+  const removeIds = existing.map((r) => r.id);
+  if (!removeIds.includes(RULE_ID)) removeIds.push(RULE_ID);
+
+  // 由模板构造拦截正则
+  const regexFilter = templateToRegex(settings.matchTemplate);
+  if (!regexFilter) {
+    console.warn(
+      "[Auto Link] 拦截模板无效（必须包含 $s）：",
+      settings.matchTemplate
+    );
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: removeIds,
+    });
+    return;
   }
+
+  // 校验正则是否可编译
+  const check = await chrome.declarativeNetRequest.isRegexSupported({
+    regex: regexFilter,
+  });
+  if (!check.isSupported) {
+    console.error("[Auto Link] 拦截正则无法编译：", check.reason, regexFilter);
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: removeIds,
+    });
+    return;
+  }
+
+  const rule = {
+    id: RULE_ID,
+    priority: 1,
+    action: {
+      type: "redirect",
+      redirect: {
+        regexSubstitution: EXT_ORIGIN + "/redirect.html?wd=\\1",
+      },
+    },
+    condition: {
+      regexFilter,
+      resourceTypes: ["main_frame"],
+    },
+  };
+
+  // 同一次调用中同时删除与添加：Chrome 保证先删后加，天然避免 id 冲突
+  await chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: removeIds,
+    addRules: [rule],
+  });
+  console.log("[Auto Link] 拦截规则已注册：", regexFilter);
+  console.log("[Auto Link] 中间页地址：", EXT_ORIGIN + "/redirect.html");
 }
 
 // ============================================================
@@ -83,12 +93,17 @@ chrome.storage.sync.get(DEFAULTS, async (items) => {
   await updateRules();
 });
 
-// 开关变化：判断逻辑在中间页实时读取 storage，这里只同步内存缓存
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== "sync") return;
+  let needRebuild = false;
   for (const key of Object.keys(DEFAULTS)) {
-    if (changes[key]) settings[key] = changes[key].newValue;
+    if (changes[key]) {
+      settings[key] = changes[key].newValue;
+      if (key === "matchTemplate") needRebuild = true;
+    }
   }
+  // 模板变化才需要重建 DNR 规则；开关只影响中间页判断
+  if (needRebuild) updateRules();
 });
 
 // ============================================================
