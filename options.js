@@ -442,7 +442,8 @@ chrome.storage.sync.get(null, (all) => {
   templateInput.value = items.matchTemplate || "";
   // 拦截地址模板：由 blockEditEnabled 决定是否允许编辑
   // （检测到 autolinkdefault=true 后会被置为 true 而解锁）
-  templateInput.disabled = !items.blockEditEnabled;
+  // 未解锁时隐藏（display:none 仍可被程序读写 value，只是不可见）
+  templateInput.style.display = items.blockEditEnabled ? "" : "none";
   templateInput.title = items.blockEditEnabled ? "" : t("tipTemplateLocked");
 
   // 搜索引擎列表：优先使用已保存的 searchEngines；
@@ -481,7 +482,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
   if (changes.blockEditEnabled) {
     const enabled = !!changes.blockEditEnabled.newValue;
-    templateInput.disabled = !enabled;
+    templateInput.style.display = enabled ? "" : "none";
     templateInput.title = enabled ? "" : t("tipTemplateLocked");
   }
 
