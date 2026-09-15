@@ -87,14 +87,23 @@ function templateToJsRegex(template) {
 }
 
 // ============================================================
-// 用 $s 占位符构造目标链接（用于兜底搜索引擎模板）
-// 例：https://cn.bing.com/search?q=$s + "天气"
-//     -> https://cn.bing.com/search?q=%E5%A4%A9%E6%B0%94
+// 用 $s 占位符构造目标链接（用于搜索引擎模板）
+// 注意：这里放入「原文」——先解码再拼入模板，不做二次编码。
+// keyword 取自 URL，本身可能已是编码形式（如 %E5%A4%A9%E6%B0%94），
+// 若再次 encodeURIComponent 会产生双重编码（%25E5...）。
+// 例：模板 https://cn.bing.com/search?q=$s  +  %E5%A4%A9%E6%B0%94
+//     -> https://cn.bing.com/search?q=天气
 // 返回 null 表示模板无效（缺少 $s）
 // ============================================================
 function applyKeywordTemplate(template, keyword) {
   if (typeof template !== "string" || template.indexOf("$s") === -1) {
     return null;
   }
-  return template.split("$s").join(encodeURIComponent(keyword || ""));
+  let text = keyword || "";
+  try {
+    text = decodeURIComponent(text);
+  } catch (e) {
+    // 非法编码序列时保持原样
+  }
+  return template.split("$s").join(text);
 }
