@@ -44,6 +44,44 @@ function flashSaved() {
   flashToast("已保存");
 }
 
+// ---------------- 模态弹窗 ----------------
+const modalMask = document.getElementById("modalMask");
+const modalTitle = document.getElementById("modalTitle");
+const modalText = document.getElementById("modalText");
+const modalCancel = document.getElementById("modalCancel");
+const modalConfirm = document.getElementById("modalConfirm");
+
+let modalHandlers = { cancel: null, confirm: null };
+
+function showModal(opts) {
+  modalTitle.textContent = opts.title || "";
+  modalText.innerHTML = opts.html || "";
+  modalCancel.textContent = opts.cancelText || "取消";
+  modalConfirm.textContent = opts.confirmText || "确定";
+  modalHandlers = {
+    cancel: opts.onCancel || null,
+    confirm: opts.onConfirm || null,
+  };
+  modalMask.classList.add("open");
+}
+
+function closeModal() {
+  modalMask.classList.remove("open");
+  modalHandlers = { cancel: null, confirm: null };
+}
+
+modalCancel.addEventListener("click", () => {
+  const fn = modalHandlers.cancel;
+  closeModal();
+  if (fn) fn();
+});
+
+modalConfirm.addEventListener("click", () => {
+  const fn = modalHandlers.confirm;
+  closeModal();
+  if (fn) fn();
+});
+
 // 右栏整体：仅在「地址栏搜索」开启时展开
 function updateTemplateVisibility() {
   templateCard.classList.toggle(
@@ -181,8 +219,38 @@ function startEdit(row, index) {
   let finished = false;
   const commit = () => {
     if (finished) return;
+    const value = input.value.trim();
+
+    // 失焦时校验：必须包含 $s
+    if (!value.includes("$s")) {
+      showModal({
+        title: "缺少 $s 占位符",
+        html:
+          "该项不包含 <code>$s</code> 占位符。<br /><br />" +
+          "<code>$s</code> 用于代表您输入的搜索词——浏览器会把 <code>$s</code> " +
+          "所在的位置替换为实际的搜索内容，例如：<br />" +
+          "<code>https://cn.bing.com/search?q=$s</code>",
+        cancelText: "删除该项",
+        confirmText: "继续编辑",
+        onCancel: () => {
+          // 删除当前项
+          finished = true;
+          engines.splice(index, 1);
+          saveEngines();
+          renderEngines();
+          if (index === 0) syncDefaultEngine();
+        },
+        onConfirm: () => {
+          // 保持编辑态并让文本框重新获得焦点
+          input.focus();
+          input.select();
+        },
+      });
+      return; // 不置 finished，允许用户继续编辑
+    }
+
     finished = true;
-    engines[index] = input.value.trim();
+    engines[index] = value;
     saveEngines();
     renderEngines();
     if (index === 0) syncDefaultEngine();

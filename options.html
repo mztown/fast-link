@@ -289,6 +289,70 @@
       .se-add-row {
         justify-content: center;
       }
+      /* 通用模态弹窗 */
+      .modal-mask {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        background: rgba(15, 23, 42, 0.45);
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-mask.open {
+        display: flex;
+      }
+      .modal {
+        width: 400px;
+        max-width: calc(100vw - 40px);
+        padding: 20px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+      }
+      .modal-title {
+        margin: 0 0 10px;
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .modal-text {
+        font-size: 13px;
+        line-height: 1.7;
+        color: #475569;
+      }
+      .modal-text code {
+        background: #f1f5f9;
+        padding: 1px 5px;
+        border-radius: 3px;
+        font-size: 12px;
+      }
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 18px;
+      }
+      .modal-btn {
+        padding: 7px 14px;
+        font-size: 13px;
+        font-family: inherit;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #fff;
+        color: #334155;
+        cursor: pointer;
+      }
+      .modal-btn:hover {
+        background: #f8fafc;
+      }
+      .modal-btn.primary {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #fff;
+      }
+      .modal-btn.primary:hover {
+        background: #1d4ed8;
+      }
       /* Switch */
       .switch {
         position: relative;
@@ -500,6 +564,18 @@
     </div>
 
     <div class="save-status" id="saveStatus">已保存</div>
+
+    <!-- 通用模态弹窗 -->
+    <div class="modal-mask" id="modalMask">
+      <div class="modal">
+        <p class="modal-title" id="modalTitle"></p>
+        <div class="modal-text" id="modalText"></div>
+        <div class="modal-actions">
+          <button type="button" class="modal-btn" id="modalCancel"></button>
+          <button type="button" class="modal-btn primary" id="modalConfirm"></button>
+        </div>
+      </div>
+    </div>
 
     <script src="convert.js"></script>
     <script src="options.js"></script>
