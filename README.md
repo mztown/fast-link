@@ -116,9 +116,13 @@
 
 ```
 fast-link/
-├── manifest.json       # 扩展清单（MV3，权限 / 页面声明）
+├── manifest.json       # 扩展清单（MV3，权限 / 页面 / 默认语言）
 ├── background.js       # Service Worker：URL 拦截 + 判断 + 跳转 + 弹窗消息
 ├── convert.js          # 共享配置、转换逻辑与模板转正则
+├── i18n.js             # 多语言渲染辅助（data-i18n 等属性）
+├── _locales/           # 多语言文案
+│   ├── en/messages.json
+│   └── zh_CN/messages.json
 ├── options.html        # 完整设置页（模板 + 开关）
 ├── options.js          # 设置页逻辑
 ├── hello.html          # 弹窗面板（输入框 + 转换按钮）
@@ -127,6 +131,20 @@ fast-link/
 ├── PRIVACY.md          # 隐私政策
 └── README.md
 ```
+
+## 多语言
+
+所有文案放在 `_locales/<locale>/messages.json`，通过 `chrome.i18n` 读取：
+
+| 用途 | 方式 |
+| --- | --- |
+| manifest 的 `name` / `description` | `__MSG_extName__` / `__MSG_extDesc__`（配合 `default_locale`） |
+| HTML 静态文案 | `data-i18n` / `data-i18n-html` / `data-i18n-title` / `data-i18n-placeholder` 属性，由 `i18n.js` 自动渲染 |
+| JS 动态文案 | `t("key")`（由 `i18n.js` 提供，可传占位符参数，如 `t("guideTitle", [name])`） |
+
+当前支持 **`en`（默认）** 与 **`zh_CN`**。新增语言只需在 `_locales` 下新建目录（如 `ja`）并复制翻译一份 `messages.json`，**无需改动任何代码**。
+
+> ⚠️ 文案中的 `$` 必须写成 `$$`（例如 `$$s`），否则会被当作占位符解析。
 
 > 注：`redirect.html` / `redirect.js` 是早期中间页方案的遗留文件，现已不再使用，可自行删除。
 

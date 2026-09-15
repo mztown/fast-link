@@ -1,6 +1,6 @@
 // ============================================================
 // 弹窗逻辑：粘贴字符串 -> 转换并打开新标签页
-// 功能开关统一在设置页（options.html）中管理
+// 文案取自 _locales（t 由 i18n.js 提供）
 // ============================================================
 
 const input = document.getElementById("input");
@@ -23,7 +23,7 @@ function showResult(type, text) {
 convertBtn.addEventListener("click", () => {
   const text = input.value;
   if (!text.trim()) {
-    showResult("error", "请输入字符串");
+    showResult("error", t("popupNeedInput"));
     return;
   }
 
@@ -33,15 +33,18 @@ convertBtn.addEventListener("click", () => {
   chrome.runtime.sendMessage({ type: "convert", text }, (resp) => {
     convertBtn.disabled = false;
     if (chrome.runtime.lastError) {
-      showResult("error", "扩展后台出错：" + chrome.runtime.lastError.message);
+      showResult(
+        "error",
+        t("popupBgError") + chrome.runtime.lastError.message
+      );
       return;
     }
     if (resp && resp.ok) {
-      showResult("success", "已打开：\n" + resp.result.url);
+      showResult("success", t("popupOpened") + "\n" + resp.result.url);
     } else {
       showResult(
         "error",
-        resp && resp.error ? resp.error : "无法识别该字符串格式"
+        resp && resp.error ? resp.error : t("cannotRecognize")
       );
     }
   });

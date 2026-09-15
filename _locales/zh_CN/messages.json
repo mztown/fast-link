@@ -1,0 +1,128 @@
+{
+  "extName": {
+    "message": "Auto Link"
+  },
+  "extDesc": {
+    "message": "拦截指定地址的流量，将搜索词转换为磁力链接 / 百度网盘链接，未匹配时跳转到自定义搜索引擎"
+  },
+
+  "popupSubtitle": { "message": "粘贴字符串，一键转换为链接" },
+  "popupInputLabel": { "message": "输入 40 位 BT 哈希 或 28 位百度分享码" },
+  "popupInputPlaceholder": { "message": "例如：1W6PUbukIFsXCCEBKuGuKdg-n6g3" },
+  "popupConvertBtn": { "message": "转换并打开" },
+  "popupAdvancedBtn": { "message": "高级模式" },
+  "popupNeedInput": { "message": "请输入字符串" },
+  "popupBgError": { "message": "扩展后台出错：" },
+  "popupOpened": { "message": "已打开：" },
+  "cannotRecognize": { "message": "无法识别该字符串格式" },
+  "featureDisabled": { "message": "该功能已在设置页中关闭" },
+
+  "optionsTitle": { "message": "Auto Link 设置" },
+  "optionsSubtitle": { "message": "配置转换规则、拦截地址与搜索引擎" },
+  "magnetTitle": { "message": "Magnet 链接转换" },
+  "magnetDesc": {
+    "message": "当搜索词为 <code>40 位英文字母数字混合</code>，或在弹窗中粘贴该字符串时，自动在前面加上 <code>magnet:?xt=urn:btih:</code> 并跳转。<strong>关闭后该功能不生效</strong>。"
+  },
+  "baiduTitle": { "message": "百度网盘链接转换" },
+  "baiduDesc": {
+    "message": "当搜索词为 <code>28 位大小写英文/数字/减号混合</code>（其中 <code>倒数第 5 位为 -</code>、后 4 位为英文数字），或在弹窗中粘贴该字符串时，自动在前面加上 <code>https://pan.baidu.com/s/</code>，并将倒数第 5 位的 <code>-</code> 替换为 <code>?pwd=</code> 后跳转。<strong>关闭后该功能不生效</strong>。"
+  },
+  "addressBarTitle": { "message": "地址栏搜索" },
+  "addressBarDesc": {
+    "message": "开启地址栏搜索功能。<br />地址栏搜索功能会拦截<strong>指定地址</strong>的流量进行判断磁链/网盘链接判断，并在未匹配时跳转到自定义搜索引擎进行搜索。"
+  },
+  "copyright": {
+    "message": "© 2026 Auto Link · 本扩展不收集、不上传任何用户数据<br />页面中的「微软积分商城」链接为推广链接，你通过它注册后作者可能获得收益"
+  },
+
+  "interceptTitle": { "message": "拦截地址模板" },
+  "interceptDesc": {
+    "message": "<strong>插件拦截的地址模板。</strong>按模板格式访问该地址会被插件拦截，如果属于磁链或网盘链接，会直接跳转到对应地址。除此之外的情况会被跳转到浏览器默认搜索引擎进行搜索。<br />可利用浏览器地址栏记忆方便跳转，或<strong>点击上方链接复制默认拦截模板，然后将默认拦截模板设置为默认搜索引擎。</strong>启用后在浏览器地址栏直接访问磁链 hash 或网盘链接地址都可直接访问，且其余内容可正常进入搜索，获得最佳体验。<br />将默认地址设置为浏览器默认搜索引擎后，你可以在这里更改想要监听的地址。<strong>可以使用任何合法的 URL 格式，即使并不真是存在的站点也可以！</strong><br />注意：在此处调整地址后，你需要重新设置浏览器默认搜索引擎为新的拦截地址模板才能生效。<br />用 <code>$$s</code> 表示搜索词的位置。"
+  },
+  "interceptAddLink": { "message": "添加为浏览器搜索引擎" },
+  "tipTemplateLocked": { "message": "该模板已锁定，不可修改" },
+
+  "customSETitle": { "message": "自定义搜索引擎" },
+  "customSEDesc": {
+    "message": "将上方「拦截地址模板」的地址设为浏览器的<strong>默认搜索引擎</strong>后，即可启用此选项，搜索时会使用下方自定义的默认搜索引擎。"
+  },
+  "defaultSETitle": { "message": "默认搜索引擎" },
+  "defaultSEDesc": {
+    "message": "未匹配上述规则时跳转的搜索引擎地址，用 <code>$$s</code> 表示搜索词位置。"
+  },
+  "promoteTag": { "message": "推广" },
+  "promoteText": { "message": "加入微软积分商城，获取购物、电影、加油权益" },
+  "promoteTitle": { "message": "推广链接：含推荐码，你通过它注册后作者可能获得收益" },
+
+  "savedToast": { "message": "已保存" },
+  "saveFailed": { "message": "保存失败：" },
+  "templateNeedS": {
+    "message": "模板必须包含 $$s 占位符，例如 $EXAMPLE$",
+    "placeholders": {
+      "example": { "content": "$1" }
+    }
+  },
+  "copiedIntercept": { "message": "已将拦截地址复制到剪贴板" },
+  "copyFailed": { "message": "复制失败：" },
+
+  "modalMissingTitle": { "message": "缺少 $$s 占位符" },
+  "modalMissingBody": {
+    "message": "该项不包含 <code>$$s</code> 占位符。<br /><br /><code>$$s</code> 用于代表您输入的搜索词——浏览器会把 <code>$$s</code> 所在的位置替换为实际的搜索内容，例如：<br /><code>https://cn.bing.com/search?q=$$s</code>"
+  },
+  "modalDelete": { "message": "删除该项" },
+  "modalContinue": { "message": "继续编辑" },
+
+  "tipPin": { "message": "置顶（设为默认搜索引擎）" },
+  "emptyItem": { "message": "（空）" },
+  "tipDelete": { "message": "删除" },
+  "tipAdd": { "message": "添加" },
+  "tipExpand": { "message": "展开列表" },
+  "tipCollapse": { "message": "收起列表" },
+
+  "guideTitle": {
+    "message": "如何设为默认搜索引擎（$BROWSER$）",
+    "placeholders": {
+      "browser": { "content": "$1" }
+    }
+  },
+  "guideOpenUrl": {
+    "message": "在地址栏打开 $URL$",
+    "placeholders": {
+      "url": { "content": "$1" }
+    }
+  },
+  "browserChrome": { "message": "Chrome" },
+  "browserEdge": { "message": "Edge" },
+  "browserOpera": { "message": "Opera" },
+  "browserFirefox": { "message": "Firefox" },
+  "browserOther": { "message": "浏览器" },
+
+  "guideChromeSteps": {
+    "message": "<li>在「网站搜索」区域点击「添加」</li><li>「网址」一栏粘贴刚复制的地址（<code>$$s</code> 已转为浏览器所需的 <code>%s</code>，并附带 <code>autolinkdefault=true</code>）</li><li>「名称」「快捷字词」可随意填写，保存</li><li>点击该项右侧「⋮」→「设为默认」</li>"
+  },
+  "guideEdgeSteps": {
+    "message": "<li>点击「添加搜索引擎」</li><li>「URL（使用 %s 代替搜索字词）」粘贴刚复制的地址（已附带 <code>autolinkdefault=true</code>）</li><li>「名称」「快捷方式」可随意填写，点击「添加」</li><li>在列表最下方找到刚添加的搜索引擎，点击该项右侧「⋮」→「设为默认」</li>"
+  },
+  "guideOperaSteps": {
+    "message": "<li>在「搜索引擎」区域点击「添加」</li><li>「网址」粘贴刚复制的地址</li><li>保存后点击「设为默认」</li>"
+  },
+  "guideFirefoxSteps": {
+    "message": "<li>打开 $URL$</li><li>Firefox 不支持直接粘贴 URL 添加自定义搜索引擎，需借助 OpenSearch 描述文件</li><li>如需此功能，建议改用 Chrome 或 Edge</li>",
+    "placeholders": {
+      "url": { "content": "$1" }
+    }
+  },
+  "guideOtherSteps": {
+    "message": "<li>打开浏览器的「搜索引擎」设置页</li><li>添加一个新的搜索引擎，「网址」粘贴刚复制的地址</li><li>将其设为默认</li>"
+  },
+
+  "settingsUrlCopied": {
+    "message": "浏览器不允许扩展直接打开设置页，地址已复制，请粘贴到地址栏"
+  },
+  "manualOpenUrl": {
+    "message": "请手动在地址栏打开：$URL$",
+    "placeholders": {
+      "url": { "content": "$1" }
+    }
+  }
+}

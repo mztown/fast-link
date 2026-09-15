@@ -1,0 +1,136 @@
+{
+  "extName": {
+    "message": "Auto Link"
+  },
+  "extDesc": {
+    "message": "Intercept traffic to a configured address, convert the search term into a magnet / Baidu Pan link, and otherwise fall back to your custom search engine"
+  },
+
+  "popupSubtitle": { "message": "Paste a string to convert it into a link" },
+  "popupInputLabel": {
+    "message": "Enter a 40-char BT hash or a 28-char Baidu share code"
+  },
+  "popupInputPlaceholder": { "message": "e.g. 1W6PUbukIFsXCCEBKuGuKdg-n6g3" },
+  "popupConvertBtn": { "message": "Convert and Open" },
+  "popupAdvancedBtn": { "message": "Advanced" },
+  "popupNeedInput": { "message": "Please enter a string" },
+  "popupBgError": { "message": "Background error: " },
+  "popupOpened": { "message": "Opened: " },
+  "cannotRecognize": { "message": "Unrecognized string format" },
+  "featureDisabled": { "message": "This feature is disabled in settings" },
+
+  "optionsTitle": { "message": "Auto Link Settings" },
+  "optionsSubtitle": {
+    "message": "Configure conversion rules, intercept address and search engine"
+  },
+  "magnetTitle": { "message": "Magnet Link Conversion" },
+  "magnetDesc": {
+    "message": "When the search term is <code>40 alphanumeric characters</code>, or you paste such a string in the popup, <code>magnet:?xt=urn:btih:</code> is prefixed and the link is opened. <strong>When disabled this feature does not take effect</strong>."
+  },
+  "baiduTitle": { "message": "Baidu Pan Link Conversion" },
+  "baiduDesc": {
+    "message": "When the search term is <code>28 characters of letters / digits / hyphen</code> (with <code>a hyphen at the 5th position from the end</code> and 4 alphanumeric characters after it), or you paste such a string in the popup, it is prefixed with <code>https://pan.baidu.com/s/</code> and the <code>-</code> is replaced by <code>?pwd=</code>. <strong>When disabled this feature does not take effect</strong>."
+  },
+  "addressBarTitle": { "message": "Address Bar Search" },
+  "addressBarDesc": {
+    "message": "Enable address bar search.<br />It intercepts traffic to the <strong>configured address</strong>, checks whether the search term is a magnet / Baidu Pan link, and falls back to your custom search engine when nothing matches."
+  },
+  "copyright": {
+    "message": "© 2026 Auto Link · This extension does not collect or upload any user data<br />The Microsoft Rewards link on this page is an affiliate link; the author may earn a reward if you sign up through it"
+  },
+
+  "interceptTitle": { "message": "Intercept Address Template" },
+  "interceptDesc": {
+    "message": "<strong>The address template intercepted by the extension.</strong> Visiting an address in this template format will be intercepted: magnet / Pan links are redirected directly, everything else is sent to your browser's default search engine.<br />It can also serve as a browser search shortcut — <strong>click the link above to copy the default template and set it as your default search engine.</strong> You can then paste a magnet hash or Pan link straight into the address bar while normal queries still go to search.<br />Once the address is set as your default search engine, you can change the intercepted address here. <strong>Any valid URL format works, even a non-existent site.</strong><br />Note: after changing the address here you must set the new template as your browser's default search engine again for it to take effect.<br />Use <code>$$s</code> for the position of the search term."
+  },
+  "interceptAddLink": { "message": "Add as browser search engine" },
+  "tipTemplateLocked": { "message": "This template is locked and cannot be edited" },
+
+  "customSETitle": { "message": "Custom Search Engine" },
+  "customSEDesc": {
+    "message": "After you set the address in the <strong>Intercept Address Template</strong> above as your browser's <strong>default search engine</strong>, you can enable this option and the custom search engine below will be used for searching."
+  },
+  "defaultSETitle": { "message": "Default Search Engine" },
+  "defaultSEDesc": {
+    "message": "The search engine used when nothing matches. Use <code>$$s</code> for the search term."
+  },
+  "promoteTag": { "message": "Ad" },
+  "promoteText": {
+    "message": "Get more perks with Microsoft Rewards"
+  },
+  "promoteTitle": {
+    "message": "Affiliate link: contains a referral code; the author may earn a reward if you sign up"
+  },
+
+  "savedToast": { "message": "Saved" },
+  "saveFailed": { "message": "Save failed: " },
+  "templateNeedS": {
+    "message": "The template must contain the $$s placeholder, for example $EXAMPLE$",
+    "placeholders": {
+      "example": { "content": "$1" }
+    }
+  },
+  "copiedIntercept": { "message": "Intercept address copied to clipboard" },
+  "copyFailed": { "message": "Copy failed: " },
+
+  "modalMissingTitle": { "message": "Missing $$s placeholder" },
+  "modalMissingBody": {
+    "message": "This item does not contain the <code>$$s</code> placeholder.<br /><br /><code>$$s</code> represents the search term you type — the browser replaces <code>$$s</code> with the actual query, for example:<br /><code>https://cn.bing.com/search?q=$$s</code>"
+  },
+  "modalDelete": { "message": "Delete this item" },
+  "modalContinue": { "message": "Keep editing" },
+
+  "tipPin": { "message": "Move to top (set as default search engine)" },
+  "emptyItem": { "message": "(empty)" },
+  "tipDelete": { "message": "Delete" },
+  "tipAdd": { "message": "Add" },
+  "tipExpand": { "message": "Expand list" },
+  "tipCollapse": { "message": "Collapse list" },
+
+  "guideTitle": {
+    "message": "How to set as the default search engine ($BROWSER$)",
+    "placeholders": {
+      "browser": { "content": "$1" }
+    }
+  },
+  "guideOpenUrl": {
+    "message": "Open $URL$ in the address bar",
+    "placeholders": {
+      "url": { "content": "$1" }
+    }
+  },
+  "browserChrome": { "message": "Chrome" },
+  "browserEdge": { "message": "Edge" },
+  "browserOpera": { "message": "Opera" },
+  "browserFirefox": { "message": "Firefox" },
+  "browserOther": { "message": "Browser" },
+
+  "guideChromeSteps": {
+    "message": "<li>Under \"Site search\", click \"Add\"</li><li>Paste the copied address into the \"URL\" field (<code>$$s</code> has been converted to the required <code>%s</code> and <code>autolinkdefault=true</code> appended)</li><li>Fill in any \"Name\" / \"Shortcut\", then save</li><li>Click the \"⋮\" next to the entry → \"Make default\"</li>"
+  },
+  "guideEdgeSteps": {
+    "message": "<li>Click \"Add search engine\"</li><li>Paste the copied address into \"URL (use %s in place of the search term)\" (<code>autolinkdefault=true</code> is already appended)</li><li>Fill in any \"Name\" / \"Shortcut\", then click \"Add\"</li><li>Find the newly added engine at the bottom of the list and click \"⋮\" → \"Make default\"</li>"
+  },
+  "guideOperaSteps": {
+    "message": "<li>Under \"Search engines\", click \"Add\"</li><li>Paste the copied address into \"URL\"</li><li>Save, then click \"Make default\"</li>"
+  },
+  "guideFirefoxSteps": {
+    "message": "<li>Open $URL$</li><li>Firefox does not support adding a custom search engine by pasting a URL; an OpenSearch description file is required</li><li>If you need this feature, consider Chrome or Edge</li>",
+    "placeholders": {
+      "url": { "content": "$1" }
+    }
+  },
+  "guideOtherSteps": {
+    "message": "<li>Open your browser's search engine settings</li><li>Add a new search engine and paste the copied address into \"URL\"</li><li>Set it as the default</li>"
+  },
+
+  "settingsUrlCopied": {
+    "message": "The browser does not allow the extension to open the settings page directly. The address has been copied — please paste it into the address bar"
+  },
+  "manualOpenUrl": {
+    "message": "Please open this in the address bar manually: $URL$",
+    "placeholders": {
+      "url": { "content": "$1" }
+    }
+  }
+}

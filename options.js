@@ -32,22 +32,22 @@ let engines = []; // 搜索引擎有序列表，[0] 即默认搜索引擎
 // 通用
 // ============================================================
 function flashToast(text) {
-  saveStatus.textContent = text || "已保存";
+  saveStatus.textContent = text || t("savedToast");
   saveStatus.classList.add("show");
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     saveStatus.classList.remove("show");
-    saveStatus.textContent = "已保存";
+    saveStatus.textContent = t("savedToast");
   }, 1800);
 }
 
 function flashSaved() {
   // storage 写入失败（例如超出 sync 配额）时给出提示
   if (chrome.runtime.lastError) {
-    flashToast("保存失败：" + chrome.runtime.lastError.message);
+    flashToast(t("saveFailed") + chrome.runtime.lastError.message);
     return;
   }
-  flashToast("已保存");
+  flashToast(t("savedToast"));
 }
 
 // ---------------- 模态弹窗 ----------------
@@ -106,7 +106,7 @@ function updateSearchEngineVisibility() {
 function checkTemplate(input, hint, example) {
   const value = input.value.trim();
   if (!value.includes("$s")) {
-    hint.textContent = "模板必须包含 $s 占位符，例如 " + example;
+    hint.textContent = t("templateNeedS", [example]);
     hint.className = "hint error";
     return null;
   }
@@ -181,7 +181,7 @@ function renderEngines() {
 
     const label = document.createElement("span");
     label.className = "se-label";
-    label.textContent = val || "(空)";
+    label.textContent = val || t("emptyItem");
     label.title = val;
     label.addEventListener("click", () => startEdit(row, index));
     row.appendChild(label);
@@ -192,11 +192,11 @@ function renderEngines() {
     // 第一行已是默认，无需置顶按钮
     if (index > 0) {
       actions.appendChild(
-        makeIconButton("pin", "置顶（设为默认搜索引擎）", () => pinToTop(index))
+        makeIconButton("pin", t("tipPin"), () => pinToTop(index))
       );
     }
     actions.appendChild(
-      makeIconButton("trash", "删除", () => removeEngine(index))
+      makeIconButton("trash", t("tipDelete"), () => removeEngine(index))
     );
 
     row.appendChild(actions);
@@ -206,7 +206,7 @@ function renderEngines() {
   // 最后一行：添加按钮
   const addRow = document.createElement("div");
   addRow.className = "se-row se-add-row";
-  addRow.appendChild(makeIconButton("plus", "添加", addEngine));
+  addRow.appendChild(makeIconButton("plus", t("tipAdd"), addEngine));
   seListInner.appendChild(addRow);
 }
 
@@ -231,14 +231,10 @@ function startEdit(row, index) {
     // 失焦时校验：必须包含 $s
     if (!value.includes("$s")) {
       showModal({
-        title: "缺少 $s 占位符",
-        html:
-          "该项不包含 <code>$s</code> 占位符。<br /><br />" +
-          "<code>$s</code> 用于代表您输入的搜索词——浏览器会把 <code>$s</code> " +
-          "所在的位置替换为实际的搜索内容，例如：<br />" +
-          "<code>https://cn.bing.com/search?q=$s</code>",
-        cancelText: "删除该项",
-        confirmText: "继续编辑",
+        title: t("modalMissingTitle"),
+        html: t("modalMissingBody"),
+        cancelText: t("modalDelete"),
+        confirmText: t("modalContinue"),
         onCancel: () => {
           // 删除当前项
           finished = true;
@@ -302,7 +298,7 @@ function addEngine() {
 function toggleList() {
   const open = seList.classList.toggle("open");
   seToggle.innerHTML = iconSvg(open ? "up" : "down");
-  seToggle.title = open ? "收起列表" : "展开列表";
+  seToggle.title = open ? t("tipCollapse") : t("tipExpand");
 }
 
 seToggle.addEventListener("click", toggleList);
@@ -335,62 +331,51 @@ function urlLink(url) {
   return '<a class="url-link" data-url="' + url + '">' + url + "</a>";
 }
 
-const BROWSER_GUIDE = {
+// 各浏览器的名称、设置页地址与指引文案键（文案取自 _locales）
+const BROWSER_CONFIG = {
   chrome: {
-    name: "Chrome",
-    steps: [
-      "在地址栏打开 " + urlLink("chrome://settings/searchEngines"),
-      "在「网站搜索」区域点击「添加」",
-      "「网址」一栏粘贴刚复制的地址（<code>$s</code> 已转为 <code>%s</code>，并附带 <code>autolinkdefault=true</code>）",
-      "「名称」「快捷字词」可随意填写，保存",
-      "点击该项右侧「⋮」→「设为默认」",
-    ],
+    nameKey: "browserChrome",
+    url: "chrome://settings/searchEngines",
+    stepsKey: "guideChromeSteps",
+    urlInSteps: false,
   },
   edge: {
-    name: "Edge",
-    steps: [
-      "在地址栏打开 " + urlLink("edge://settings/searchEngines"),
-      "点击「添加搜索引擎」",
-      "「URL（使用 %s 代替搜索字词）」粘贴刚复制的地址（已附带 <code>autolinkdefault=true</code>）",
-      "「名称」「快捷方式」可随意填写，点击「添加」",
-      "在列表最下方找到刚添加的搜索引擎，点击该项右侧「⋮」→「设为默认」",
-    ],
+    nameKey: "browserEdge",
+    url: "edge://settings/searchEngines",
+    stepsKey: "guideEdgeSteps",
+    urlInSteps: false,
   },
   opera: {
-    name: "Opera",
-    steps: [
-      "在地址栏打开 " + urlLink("opera://settings/searchEngines"),
-      "在「搜索引擎」区域点击「添加」",
-      "「网址」粘贴刚复制的地址",
-      "保存后点击「设为默认」",
-    ],
+    nameKey: "browserOpera",
+    url: "opera://settings/searchEngines",
+    stepsKey: "guideOperaSteps",
+    urlInSteps: false,
   },
   firefox: {
-    name: "Firefox",
-    steps: [
-      "打开 " + urlLink("about:preferences#search"),
-      "Firefox 不支持直接粘贴 URL 添加自定义搜索引擎，需借助 OpenSearch 描述文件",
-      "如需此功能，建议改用 Chrome 或 Edge",
-    ],
-  },
-  other: {
-    name: "浏览器",
-    steps: [
-      "打开浏览器的「搜索引擎」设置页",
-      "添加一个新的搜索引擎，「网址」粘贴刚复制的地址",
-      "将其设为默认",
-    ],
+    nameKey: "browserFirefox",
+    url: "about:preferences#search",
+    stepsKey: "guideFirefoxSteps",
+    urlInSteps: true, // 链接已内嵌在该文案中
   },
 };
 
 function showSearchEngineGuide() {
-  const g = BROWSER_GUIDE[detectBrowser()] || BROWSER_GUIDE.other;
-  seGuide.innerHTML =
-    "<strong>如何设为默认搜索引擎（" +
-    g.name +
-    "）</strong><ol>" +
-    g.steps.map((s) => "<li>" + s + "</li>").join("") +
-    "</ol>";
+  const cfg = BROWSER_CONFIG[detectBrowser()] || {
+    nameKey: "browserOther",
+    url: "",
+    stepsKey: "guideOtherSteps",
+    urlInSteps: false,
+  };
+
+  const title = t("guideTitle", [t(cfg.nameKey)]);
+  const openStep = cfg.url
+    ? "<li>" + t("guideOpenUrl", [urlLink(cfg.url)]) + "</li>"
+    : "";
+  const steps = cfg.urlInSteps
+    ? t(cfg.stepsKey, [urlLink(cfg.url)])
+    : openStep + t(cfg.stepsKey);
+
+  seGuide.innerHTML = "<strong>" + title + "</strong><ol>" + steps + "</ol>";
   seGuide.style.display = "block";
 }
 
@@ -406,9 +391,9 @@ addAsSearchEngine.addEventListener("click", async () => {
 
   try {
     await navigator.clipboard.writeText(forBrowser);
-    flashToast("已将拦截地址复制到剪贴板");
+    flashToast(t("copiedIntercept"));
   } catch (err) {
-    flashToast("复制失败：" + (err && err.message ? err.message : err));
+    flashToast(t("copyFailed") + (err && err.message ? err.message : err));
   }
   showSearchEngineGuide();
 });
@@ -417,9 +402,9 @@ addAsSearchEngine.addEventListener("click", async () => {
 async function copySettingsUrl(url) {
   try {
     await navigator.clipboard.writeText(url);
-    flashToast("浏览器不允许扩展直接打开设置页，地址已复制，请粘贴到地址栏");
+    flashToast(t("settingsUrlCopied"));
   } catch (e) {
-    flashToast("请手动在地址栏打开：" + url);
+    flashToast(t("manualOpenUrl", [url]));
   }
 }
 
@@ -458,7 +443,7 @@ chrome.storage.sync.get(null, (all) => {
   // 拦截地址模板：由 blockEditEnabled 决定是否允许编辑
   // （检测到 autolinkdefault=true 后会被置为 true 而解锁）
   templateInput.disabled = !items.blockEditEnabled;
-  templateInput.title = items.blockEditEnabled ? "" : "该模板已锁定，不可修改";
+  templateInput.title = items.blockEditEnabled ? "" : t("tipTemplateLocked");
 
   // 搜索引擎列表：优先使用已保存的 searchEngines；
   // 否则以默认列表（Bing 位于首位）为基础，
@@ -497,7 +482,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (changes.blockEditEnabled) {
     const enabled = !!changes.blockEditEnabled.newValue;
     templateInput.disabled = !enabled;
-    templateInput.title = enabled ? "" : "该模板已锁定，不可修改";
+    templateInput.title = enabled ? "" : t("tipTemplateLocked");
   }
 
   if (changes.isDefaultSE) {

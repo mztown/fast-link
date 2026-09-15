@@ -203,7 +203,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (result) {
       const key = result.type === "magnet" ? "enableMagnet" : "enableBaidu";
       if (!settings[key]) {
-        sendResponse({ ok: false, error: "该功能已在设置页中关闭" });
+        sendResponse({
+          ok: false,
+          error: chrome.i18n.getMessage("featureDisabled") || "featureDisabled",
+        });
         return false;
       }
       try {
@@ -214,7 +217,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       }
       sendResponse({ ok: true, result });
     } else {
-      sendResponse({ ok: false, error: "无法识别该字符串格式" });
+      sendResponse({
+        ok: false,
+        error: chrome.i18n.getMessage("cannotRecognize") || "cannotRecognize",
+      });
     }
   }
   return false;

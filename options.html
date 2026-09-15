@@ -469,21 +469,23 @@
     </style>
   </head>
   <body>
-    <h1>Auto Link 设置</h1>
-    <p class="subtitle">配置转换规则、拦截地址与搜索引擎</p>
+    <h1 data-i18n="optionsTitle">Auto Link 设置</h1>
+    <p class="subtitle" data-i18n="optionsSubtitle">
+      配置转换规则、拦截地址与搜索引擎
+    </p>
 
     <div class="layout">
       <!-- 左栏：各转换规则开关 + 法律信息 -->
       <div class="col col-left">
         <div class="rule">
           <div class="rule-head">
-            <span class="rule-title">Magnet 链接转换</span>
+            <span class="rule-title" data-i18n="magnetTitle">Magnet 链接转换</span>
             <label class="switch">
               <input type="checkbox" id="enableMagnet" />
               <span class="slider"></span>
             </label>
           </div>
-          <p class="rule-desc">
+          <p class="rule-desc" data-i18n-html="magnetDesc">
             当搜索词为 <code>40 位英文字母数字混合</code>，或在弹窗中粘贴该字符串时，
             自动在前面加上 <code>magnet:?xt=urn:btih:</code> 并跳转。
             <strong>关闭后该功能不生效</strong>。
@@ -492,13 +494,13 @@
 
         <div class="rule">
           <div class="rule-head">
-            <span class="rule-title">百度网盘链接转换</span>
+            <span class="rule-title" data-i18n="baiduTitle">百度网盘链接转换</span>
             <label class="switch">
               <input type="checkbox" id="enableBaidu" />
               <span class="slider"></span>
             </label>
           </div>
-          <p class="rule-desc">
+          <p class="rule-desc" data-i18n-html="baiduDesc">
             当搜索词为 <code>28 位大小写英文/数字/减号混合</code>（其中
             <code>倒数第 5 位为 -</code>、后 4 位为英文数字），或在弹窗中粘贴该字符串时，
             自动在前面加上 <code>https://pan.baidu.com/s/</code>，并将倒数第 5 位的
@@ -509,19 +511,19 @@
 
         <div class="rule">
           <div class="rule-head">
-            <span class="rule-title">地址栏搜索</span>
+            <span class="rule-title" data-i18n="addressBarTitle">地址栏搜索</span>
             <label class="switch">
               <input type="checkbox" id="enableFallbackSearch" />
               <span class="slider"></span>
             </label>
           </div>
-          <p class="rule-desc">
+          <p class="rule-desc" data-i18n-html="addressBarDesc">
             开启地址栏搜索功能。<br />
             地址栏搜索功能会拦截<strong>指定地址</strong>的流量进行判断磁链/网盘链接判断，并在未匹配时跳转到自定义搜索引擎进行搜索。
           </p>
         </div>
 
-        <p class="copyright">
+        <p class="copyright" data-i18n-html="copyright">
           © 2026 Auto Link · 本扩展不收集、不上传任何用户数据<br />
           页面中的「微软积分商城」链接为推广链接，你通过它注册后作者可能获得收益
         </p>
@@ -533,10 +535,15 @@
           <div class="scroll-box">
             <div class="rule">
               <div class="rule-head">
-                <span class="rule-title">拦截地址模板</span>
-                <a class="link" id="addAsSearchEngine">添加为浏览器搜索引擎</a>
+                <span class="rule-title" data-i18n="interceptTitle">拦截地址模板</span>
+                <a
+                  class="link"
+                  id="addAsSearchEngine"
+                  data-i18n="interceptAddLink"
+                  >添加为浏览器搜索引擎</a
+                >
               </div>
-              <p class="rule-desc">
+              <p class="rule-desc" data-i18n-html="interceptDesc">
                 <strong>插件拦截的地址模板。</strong>按模板格式访问该地址会被插件拦截，如果属于磁链或网盘链接，会直接跳转到对应地址。除此之外的情况会被跳转到浏览器默认搜索引擎进行搜索。<br />
                 可利用浏览器地址栏记忆方便跳转，或<strong>点击上方链接复制默认拦截模板, 然后将默认拦截模板设置为默认搜索引擎。</strong>启用后在浏览器地址栏直接访问磁链hash或网盘链接地址都可直接访问，且其余内容可正常进入搜索，获得最佳体验<br />
                 将默认地址设置为浏览器默认搜索引擎后，你可以在这里更改想要监听的地址。<strong>可以使用任何合法的URL格式, 即使并不真是存在的站点也可以! </strong><br />
@@ -555,13 +562,13 @@
 
             <div class="rule">
               <div class="rule-head">
-                <span class="rule-title">自定义搜索引擎</span>
+                <span class="rule-title" data-i18n="customSETitle">自定义搜索引擎</span>
                 <label class="switch">
                   <input type="checkbox" id="isDefaultSE" />
                   <span class="slider"></span>
                 </label>
               </div>
-              <p class="rule-desc">
+              <p class="rule-desc" data-i18n-html="customSEDesc">
                 将上方「拦截地址模板」的地址设为浏览器的<strong>默认搜索引擎</strong>后，
                 即可启用此选项，搜索时会使用下方自定义的默认搜索引擎。
               </p>
@@ -571,9 +578,9 @@
               <div class="se-collapse-inner">
                 <div class="rule">
                   <div class="rule-head">
-                    <span class="rule-title">默认搜索引擎</span>
+                    <span class="rule-title" data-i18n="defaultSETitle">默认搜索引擎</span>
                   </div>
-                  <p class="rule-desc">
+                  <p class="rule-desc" data-i18n-html="defaultSEDesc">
                     未匹配上述规则时跳转的搜索引擎地址，用 <code>$s</code> 表示搜索词位置。
                   </p>
                   <a
@@ -582,10 +589,13 @@
                     href="https://rewards.bing.com/welcome?rh=VTo34eLDLJ8&amp;ref=rafsrchae"
                     target="_blank"
                     rel="noopener"
+                    data-i18n-title="promoteTitle"
                     title="推广链接：含推荐码，你通过它注册后作者可能获得收益"
                     style="display: none"
-                    ><span class="promo-tag">推广</span
-                    >加入微软积分商城，获取购物、电影、加油权益</a
+                    ><span class="promo-tag" data-i18n="promoteTag">推广</span
+                    ><span data-i18n="promoteText"
+                      >加入微软积分商城，获取购物、电影、加油权益</span
+                    ></a
                   >
                   <div class="se-input-row">
                     <input
@@ -598,6 +608,7 @@
                       type="button"
                       class="icon-btn"
                       id="seToggle"
+                      data-i18n-title="tipExpand"
                       title="展开列表"
                     ></button>
                   </div>
@@ -613,7 +624,7 @@
       </div>
     </div>
 
-    <div class="save-status" id="saveStatus">已保存</div>
+    <div class="save-status" id="saveStatus" data-i18n="savedToast">已保存</div>
 
     <!-- 通用模态弹窗 -->
     <div class="modal-mask" id="modalMask">
@@ -627,6 +638,7 @@
       </div>
     </div>
 
+    <script src="i18n.js"></script>
     <script src="convert.js"></script>
     <script src="options.js"></script>
   </body>

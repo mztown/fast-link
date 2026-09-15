@@ -93,16 +93,21 @@
   </head>
   <body>
     <h1>Auto Link</h1>
-    <p class="subtitle">粘贴字符串，一键转换为链接</p>
+    <p class="subtitle" data-i18n="popupSubtitle">粘贴字符串，一键转换为链接</p>
 
-    <label for="input">输入 40 位 BT 哈希 或 28 位百度分享码</label>
-    <textarea id="input" placeholder="例如：1W6PUbukIFsXCCEBKuGuKdg-n6g3"></textarea>
-    <button class="convert-btn" id="convertBtn">转换并打开</button>
+    <label for="input" data-i18n="popupInputLabel">输入 40 位 BT 哈希 或 28 位百度分享码</label>
+    <textarea
+      id="input"
+      data-i18n-placeholder="popupInputPlaceholder"
+      placeholder="例如：1W6PUbukIFsXCCEBKuGuKdg-n6g3"
+    ></textarea>
+    <button class="convert-btn" id="convertBtn" data-i18n="popupConvertBtn">转换并打开</button>
 
     <div class="result" id="result"></div>
 
-    <button class="advanced-btn" id="openSettings">高级模式</button>
+    <button class="advanced-btn" id="openSettings" data-i18n="popupAdvancedBtn">高级模式</button>
 
+    <script src="i18n.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>
