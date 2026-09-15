@@ -52,6 +52,22 @@
         transform: translateX(-400px); /* 向左缩回，视觉上从左侧抽出 */
         opacity: 0;
       }
+      /* 右栏内容滚动框：内容超出可视高度时在框内上下滚动 */
+      .scroll-box {
+        max-height: calc(100vh - 170px);
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+      .scroll-box::-webkit-scrollbar {
+        width: 8px;
+      }
+      .scroll-box::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      .scroll-box::-webkit-scrollbar-track {
+        background: transparent;
+      }
       /* 首次渲染时禁用过渡，避免初始状态变化触发动画 */
       .no-anim,
       .no-anim * {
@@ -260,55 +276,57 @@
       <!-- 右栏：兜底搜索引擎 + 拦截地址模板（仅兜底开启时展开） -->
       <div class="col col-right" id="templateCard">
         <div class="col-inner">
-          <div class="rule">
-            <div class="rule-head">
-              <span class="rule-title">自定义搜索引擎</span>
-              <label class="switch">
-                <input type="checkbox" id="isDefaultSE" />
-                <span class="slider"></span>
-              </label>
+          <div class="scroll-box">
+            <div class="rule">
+              <div class="rule-head">
+                <span class="rule-title">自定义搜索引擎</span>
+                <label class="switch">
+                  <input type="checkbox" id="isDefaultSE" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <p class="rule-desc">
+                将下方「拦截地址模板」的地址设为浏览器的<strong>默认搜索引擎</strong>后，
+                即可启用此选项，搜索时会使用下方自定义的默认搜索引擎；
+                否则需要手动把该地址输入地址栏才能进行搜索。
+              </p>
             </div>
-            <p class="rule-desc">
-              将下方「拦截地址模板」的地址设为浏览器的<strong>默认搜索引擎</strong>后，
-              即可启用此选项，搜索时会使用下方自定义的兜底搜索引擎；
-              否则需要手动把该地址输入地址栏才能进行搜索。
-            </p>
-          </div>
 
-          <div class="rule" id="searchEngineCard">
-            <div class="rule-head">
-              <span class="rule-title">兜底搜索引擎</span>
+            <div class="rule" id="searchEngineCard">
+              <div class="rule-head">
+                <span class="rule-title">默认搜索引擎</span>
+              </div>
+              <p class="rule-desc">
+                未匹配上述规则时跳转的搜索引擎地址，用 <code>$s</code> 表示搜索词位置。
+              </p>
+              <input
+                type="text"
+                id="searchTemplate"
+                class="text-input"
+                placeholder="https://cn.bing.com/search?q=$s"
+              />
+              <div class="hint" id="searchHint"></div>
             </div>
-            <p class="rule-desc">
-              未匹配上述规则时跳转的搜索引擎地址，用 <code>$s</code> 表示搜索词位置。
-            </p>
-            <input
-              type="text"
-              id="searchTemplate"
-              class="text-input"
-              placeholder="https://cn.bing.com/search?q=$s"
-            />
-            <div class="hint" id="searchHint"></div>
-          </div>
 
-          <div class="rule">
-            <div class="rule-head">
-              <span class="rule-title">拦截地址模板</span>
-              <a class="link" id="addAsSearchEngine">添加为浏览器搜索引擎</a>
+            <div class="rule">
+              <div class="rule-head">
+                <span class="rule-title">拦截地址模板</span>
+                <a class="link" id="addAsSearchEngine">添加为浏览器搜索引擎</a>
+              </div>
+              <p class="rule-desc">
+                用 <code>$s</code> 表示搜索词的位置。扩展会拦截匹配该模板的链接，
+                把 <code>$s</code> 处的内容交由扩展判断：命中上述规则则跳转对应链接，
+                否则跳转上方配置的搜索引擎。
+              </p>
+              <input
+                type="text"
+                id="matchTemplate"
+                class="text-input"
+                placeholder="https://example.com/?wd=$s"
+              />
+              <div class="hint" id="templateHint"></div>
+              <div class="guide" id="seGuide"></div>
             </div>
-            <p class="rule-desc">
-              用 <code>$s</code> 表示搜索词的位置。扩展会拦截匹配该模板的链接，
-              把 <code>$s</code> 处的内容交由中间页判断：命中上述规则则跳转对应链接，
-              否则跳转上方配置的搜索引擎。
-            </p>
-            <input
-              type="text"
-              id="matchTemplate"
-              class="text-input"
-              placeholder="https://example.com/?wd=$s"
-            />
-            <div class="hint" id="templateHint"></div>
-            <div class="guide" id="seGuide"></div>
           </div>
         </div>
       </div>
