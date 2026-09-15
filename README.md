@@ -15,8 +15,9 @@
 | --- | --- | --- |
 | `matchTemplate` | 拦截地址模板 | `https://autolinreserved.publicvm.com/?wd=$s` |
 | `searchEngines` | 搜索引擎有序列表（第 0 项为默认搜索引擎） | 含 Bing / Google / Ecosia / Yahoo / Yandex 五项，详见 `convert.js` |
-| `isDefaultSE` | 自定义搜索引擎开关 | `false` |
-| `isDefalutSEDisabled` | 上项开关是否禁用（检测到 `autolinkdefault=true` 后自动置为 `false`） | `true` |
+| `isDefaultSE` | 自定义搜索引擎开关（检测到 `autolinkdefault=true` 后自动置为 `true`） | `false` |
+| `isDefalutSEDisabled` | 上项开关是否禁用（同上，自动置为 `false` 以解除禁用） | `true` |
+| `blockEditEnabled` | 拦截地址模板是否允许编辑（同上，自动解锁为 `true`） | `false` |
 
 命中拦截后，按以下顺序判断搜索词：
 
@@ -95,9 +96,15 @@
 `https://autolinreserved.publicvm.com/?wd=%s&autolinkdefault=true` 的地址
 （`$s` 转为浏览器所需的 `%s`，并追加 `autolinkdefault=true`）。
 
-用户把它设为浏览器默认搜索引擎后，每次地址栏搜索都会带上该参数；扩展拦截到
-`autolinkdefault=true` 时，即把 `isDefalutSEDisabled` 置为 `false`，
-从而解锁「自定义搜索引擎」开关。
+用户把它设为浏览器默认搜索引擎后，每次地址栏搜索都会带上该参数。扩展拦截到
+`autolinkdefault=true` 时会：
+
+1. **跳过 `chrome.search.query`** —— 此时浏览器的默认搜索引擎就是本拦截地址，
+   若继续调用会形成无限循环；
+2. 把 `isDefaultSE` 置为 `true`、`isDefalutSEDisabled` 置为 `false`，
+   即打开「自定义搜索引擎」开关并解除其禁用状态（用户仍可自行关闭）；
+3. 把 `blockEditEnabled` 置为 `true`，解锁「拦截地址模板」的编辑；
+4. 然后照常进入转换 / 兜底跳转的判断逻辑。
 
 ### 其他
 

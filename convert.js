@@ -22,6 +22,7 @@ const DEFAULTS = {
   enableFallbackSearch: true, // 兜底跳转搜索（默认开启）
   isDefaultSE: false, // 自定义搜索引擎开关（默认关闭）
   isDefalutSEDisabled: true, // 该开关是否禁用（默认禁用）
+  blockEditEnabled: false, // 拦截地址模板是否允许编辑（默认锁定）
 };
 
 // ============================================================

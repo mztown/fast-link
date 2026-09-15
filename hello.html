@@ -40,16 +40,21 @@
         outline: none;
         border-color: #2563eb;
       }
-      .convert-btn {
+      /* 两个操作按钮共用尺寸，保证等大 */
+      .convert-btn,
+      .advanced-btn {
         width: 100%;
         margin-top: 10px;
         padding: 9px;
         font-size: 14px;
         color: #fff;
-        background: #2563eb;
         border: none;
         border-radius: 6px;
         cursor: pointer;
+        font-family: inherit;
+      }
+      .convert-btn {
+        background: #2563eb;
       }
       .convert-btn:hover {
         background: #1d4ed8;
@@ -57,6 +62,12 @@
       .convert-btn:disabled {
         background: #cbd5e1;
         cursor: not-allowed;
+      }
+      .advanced-btn {
+        background: #7c3aed;
+      }
+      .advanced-btn:hover {
+        background: #6d28d9;
       }
       .result {
         margin-top: 10px;
@@ -78,21 +89,6 @@
         color: #b91c1c;
         border: 1px solid #fecaca;
       }
-      .open-settings {
-        display: block;
-        margin-top: 12px;
-        padding-top: 10px;
-        border-top: 1px solid #f0f0f0;
-        font-size: 12px;
-        color: #2563eb;
-        cursor: pointer;
-        text-decoration: underline;
-      }
-      .hint {
-        margin-top: 6px;
-        font-size: 11px;
-        color: #999;
-      }
     </style>
   </head>
   <body>
@@ -105,8 +101,7 @@
 
     <div class="result" id="result"></div>
 
-    <a class="open-settings" id="openSettings">打开完整设置页</a>
-    <p class="hint">功能开关（Magnet / 百度网盘转换）请在设置页中管理</p>
+    <button class="advanced-btn" id="openSettings">高级模式</button>
 
     <script src="popup.js"></script>
   </body>

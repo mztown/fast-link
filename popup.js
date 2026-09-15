@@ -8,7 +8,7 @@ const convertBtn = document.getElementById("convertBtn");
 const resultBox = document.getElementById("result");
 const openSettings = document.getElementById("openSettings");
 
-// 打开完整设置页
+// 高级模式：打开完整设置页
 openSettings.addEventListener("click", () => {
   chrome.runtime.openOptionsPage();
 });

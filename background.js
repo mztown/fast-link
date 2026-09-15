@@ -38,6 +38,18 @@ function extractKeyword(raw) {
   return kw;
 }
 
+// 安全跳转：标签页可能已被关闭或再次跳转，
+// 此时 chrome.tabs.update 会 reject（No tab with id），静默忽略即可
+function safeTabsUpdate(tabId, url) {
+  if (!url) return;
+  try {
+    const p = chrome.tabs.update(tabId, { url });
+    if (p && typeof p.catch === "function") p.catch(() => {});
+  } catch (e) {
+    // 忽略
+  }
+}
+
 // 处理导航
 function handleNavigation(details) {
   if (details.frameId !== 0) return; // 只处理主框架
@@ -49,9 +61,36 @@ function handleNavigation(details) {
 
   const keyword = extractKeyword(m[1]);
 
-  // 识别「拦截地址已被设为浏览器默认搜索引擎」
-  if (/[?&]autolinkdefault=true(?:&|$)/.test(details.url)) {
-    chrome.storage.sync.set({ isDefalutSEDisabled: false });
+  // 识别「拦截地址已被设为浏览器默认搜索引擎」。
+  // 此时浏览器的默认搜索引擎就是本拦截地址，若再调用 chrome.search.query
+  // 会形成无限循环，因此本次导航强制跳过该分支，改用自定义搜索引擎；
+  // 同时锁定 isDefaultSE / isDefalutSEDisabled，并解锁拦截地址模板的编辑。
+  const hasAutolinkFlag = /[?&]autolinkdefault=true(?:&|$)/.test(details.url);
+  let skipSearchQuery = false;
+
+  if (hasAutolinkFlag) {
+    skipSearchQuery = true;
+
+    if (
+      !settings.isDefaultSE ||
+      settings.isDefalutSEDisabled ||
+      !settings.blockEditEnabled
+    ) {
+      // 先更新内存缓存，避免每次导航都写 storage 触发写入配额限制
+      settings.isDefaultSE = true;
+      settings.isDefalutSEDisabled = false;
+      settings.blockEditEnabled = true;
+      try {
+        const p = chrome.storage.sync.set({
+          isDefaultSE: true,
+          isDefalutSEDisabled: false,
+          blockEditEnabled: true,
+        });
+        if (p && typeof p.catch === "function") p.catch(() => {});
+      } catch (e) {
+        // 忽略
+      }
+    }
   }
 
   // 1) 命中转换规则 -> 跳转目标服务
@@ -59,9 +98,7 @@ function handleNavigation(details) {
   if (result) {
     const enabled =
       result.type === "magnet" ? settings.enableMagnet : settings.enableBaidu;
-    if (enabled) {
-      chrome.tabs.update(details.tabId, { url: result.url });
-    }
+    if (enabled) safeTabsUpdate(details.tabId, result.url);
     return;
   }
 
@@ -75,24 +112,40 @@ function handleNavigation(details) {
 
   // 2a) 自定义搜索引擎
   if (settings.isDefaultSE) {
-    const target = applyKeywordTemplate(defaultEngine, keyword);
-    if (target) chrome.tabs.update(details.tabId, { url: target });
+    safeTabsUpdate(
+      details.tabId,
+      applyKeywordTemplate(defaultEngine, keyword)
+    );
     return;
   }
 
   // 2b) 浏览器默认搜索引擎
-  if (chrome.search && typeof chrome.search.query === "function") {
+  //     检测到 autolinkdefault 时跳过（默认引擎即本拦截地址，会无限循环）
+  if (
+    !skipSearchQuery &&
+    chrome.search &&
+    typeof chrome.search.query === "function"
+  ) {
     try {
-      chrome.search.query({ text: keyword, tabId: details.tabId });
-      return;
+      const p = chrome.search.query({ text: keyword, tabId: details.tabId });
+      if (p && typeof p.then === "function") {
+        p.then(() => {}).catch(() => {
+          // 调用失败时回退到自定义模板
+          safeTabsUpdate(
+            details.tabId,
+            applyKeywordTemplate(defaultEngine, keyword)
+          );
+        });
+        return;
+      }
+      return; // 旧版回调形式
     } catch (e) {
-      // 失败则走回退
+      // 同步异常 -> 走回退
     }
   }
 
   // 2c) 回退到默认搜索引擎模板
-  const fallback = applyKeywordTemplate(defaultEngine, keyword);
-  if (fallback) chrome.tabs.update(details.tabId, { url: fallback });
+  safeTabsUpdate(details.tabId, applyKeywordTemplate(defaultEngine, keyword));
 }
 
 chrome.webNavigation.onBeforeNavigate.addListener(handleNavigation, {
@@ -104,10 +157,20 @@ chrome.webNavigation.onBeforeNavigate.addListener(handleNavigation, {
 // ============================================================
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === "install") {
-    chrome.storage.sync.set({
-      searchEngines: DEFAULTS.searchEngines.slice(),
-    });
-    console.log("[Auto Link] 首次安装，已写入默认搜索引擎列表");
+    try {
+      const p = chrome.storage.sync.set({
+        searchEngines: DEFAULTS.searchEngines.slice(),
+      });
+      if (p && typeof p.then === "function") {
+        p.then(() => {
+          console.log("[Auto Link] 首次安装，已写入默认搜索引擎列表");
+        }).catch((err) => {
+          console.warn("[Auto Link] 写入默认搜索引擎列表失败：", err);
+        });
+      }
+    } catch (e) {
+      console.warn("[Auto Link] 写入默认搜索引擎列表失败：", e);
+    }
   }
 });
 
@@ -143,7 +206,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse({ ok: false, error: "该功能已在设置页中关闭" });
         return false;
       }
-      chrome.tabs.create({ url: result.url });
+      try {
+        const p = chrome.tabs.create({ url: result.url });
+        if (p && typeof p.catch === "function") p.catch(() => {});
+      } catch (e) {
+        // 忽略
+      }
       sendResponse({ ok: true, result });
     } else {
       sendResponse({ ok: false, error: "无法识别该字符串格式" });

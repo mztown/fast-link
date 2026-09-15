@@ -42,6 +42,11 @@ function flashToast(text) {
 }
 
 function flashSaved() {
+  // storage 写入失败（例如超出 sync 配额）时给出提示
+  if (chrome.runtime.lastError) {
+    flashToast("保存失败：" + chrome.runtime.lastError.message);
+    return;
+  }
   flashToast("已保存");
 }
 
@@ -450,14 +455,21 @@ chrome.storage.sync.get(null, (all) => {
     switches[key].checked = !!items[key];
   }
   templateInput.value = items.matchTemplate || "";
+  // 拦截地址模板：由 blockEditEnabled 决定是否允许编辑
+  // （检测到 autolinkdefault=true 后会被置为 true 而解锁）
+  templateInput.disabled = !items.blockEditEnabled;
+  templateInput.title = items.blockEditEnabled ? "" : "该模板已锁定，不可修改";
 
-  // 搜索引擎列表：优先 searchEngines，其次从旧的 searchTemplate 迁移
+  // 搜索引擎列表：优先使用已保存的 searchEngines；
+  // 否则以默认列表（Bing 位于首位）为基础，
+  // 并把旧的单项 searchTemplate 追加到末尾，避免丢失用户配置
   if (Array.isArray(all.searchEngines) && all.searchEngines.length) {
     engines = all.searchEngines.slice();
-  } else if (all.searchTemplate) {
-    engines = [all.searchTemplate];
   } else {
     engines = DEFAULTS.searchEngines.slice();
+    if (all.searchTemplate && !engines.includes(all.searchTemplate)) {
+      engines.push(all.searchTemplate);
+    }
   }
   renderEngines();
   syncDefaultEngine();
@@ -476,6 +488,26 @@ chrome.storage.sync.get(null, (all) => {
       document.body.classList.remove("no-anim");
     });
   });
+});
+
+// 其他上下文（如拦截触发时）修改了配置，这里实时同步 UI
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== "sync") return;
+
+  if (changes.blockEditEnabled) {
+    const enabled = !!changes.blockEditEnabled.newValue;
+    templateInput.disabled = !enabled;
+    templateInput.title = enabled ? "" : "该模板已锁定，不可修改";
+  }
+
+  if (changes.isDefaultSE) {
+    isDefaultSE.checked = !!changes.isDefaultSE.newValue;
+    updateSearchEngineVisibility();
+  }
+
+  if (changes.isDefalutSEDisabled) {
+    isDefaultSE.disabled = !!changes.isDefalutSEDisabled.newValue;
+  }
 });
 
 // ---- 各规则开关：变化即保存 ----
