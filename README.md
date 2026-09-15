@@ -14,7 +14,7 @@
 | 配置项 | 作用 | 默认值 |
 | --- | --- | --- |
 | `matchTemplate` | 拦截地址模板 | `https://autolinreserved.publicvm.com/?wd=$s` |
-| `searchEngines` | 搜索引擎有序列表（第 0 项为默认搜索引擎） | `["https://cn.bing.com/search?q=$s"]` |
+| `searchEngines` | 搜索引擎有序列表（第 0 项为默认搜索引擎） | 含 Bing / Google / Ecosia / Yahoo / Yandex 五项，详见 `convert.js` |
 | `isDefaultSE` | 自定义搜索引擎开关 | `false` |
 | `isDefalutSEDisabled` | 上项开关是否禁用（检测到 `autolinkdefault=true` 后自动置为 `false`） | `true` |
 

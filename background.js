@@ -100,6 +100,18 @@ chrome.webNavigation.onBeforeNavigate.addListener(handleNavigation, {
 });
 
 // ============================================================
+// 首次安装：写入默认搜索引擎列表
+// ============================================================
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === "install") {
+    chrome.storage.sync.set({
+      searchEngines: DEFAULTS.searchEngines.slice(),
+    });
+    console.log("[Auto Link] 首次安装，已写入默认搜索引擎列表");
+  }
+});
+
+// ============================================================
 // 启动与配置同步
 // ============================================================
 chrome.storage.sync.get(DEFAULTS, (items) => {

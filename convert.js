@@ -9,7 +9,14 @@
 const DEFAULTS = {
   matchTemplate: "https://autolinreserved.publicvm.com/?wd=$s",
   // 有序的搜索引擎列表，第 0 项即「默认搜索引擎」
-  searchEngines: ["https://cn.bing.com/search?q=$s"],
+  // 首次安装时会写入 chrome.storage.sync（见 background.js 的 onInstalled）
+  searchEngines: [
+    "https://cn.bing.com/search?q=$s",
+    "https://www.google.com/search?q=$s",
+    "https://www.ecosia.org/search?q=$s",
+    "https://search.yahoo.com/search?p=$s",
+    "https://yandex.com/search/?text=$s",
+  ],
   enableMagnet: true,
   enableBaidu: true,
   enableFallbackSearch: true, // 兜底跳转搜索（默认开启）
