@@ -13,6 +13,7 @@ const DEFAULTS = {
   searchEngines: [
     "https://cn.bing.com/search?q=$s",
     "https://www.google.com/search?q=$s",
+    "https://duckduckgo.com/?q=$s",
     "https://www.ecosia.org/search?q=$s",
     "https://search.yahoo.com/search?p=$s",
     "https://yandex.com/search/?text=$s",
