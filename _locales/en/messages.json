@@ -36,7 +36,7 @@
     "message": "Enable address bar search.<br />It intercepts traffic to the <strong>configured address</strong>, checks whether the search term is a magnet / Baidu Pan link, and falls back to your custom search engine when nothing matches."
   },
   "copyright": {
-    "message": "© 2026 Auto Link · This extension does not collect or upload any user data<br />The Microsoft Rewards link on this page is an affiliate link; the author may earn a reward if you sign up through it"
+    "message": "© 2026 Auto Link · This extension does not collect or upload any user data<br />The Microsoft Rewards link on this page is an affiliate link; the author may earn a reward if you sign up through it<br />For feature requests and bug reports, visit <a href='https://github.com/mztown/fast-link/issues' target='_blank' rel='noopener'>github.com/mztown/fast-link/issues</a>"
   },
 
   "interceptTitle": { "message": "Intercept Address Template" },

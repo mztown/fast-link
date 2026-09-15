@@ -173,6 +173,7 @@ fast-link/
 
 © 2026 Auto Link
 
+- 功能请求与问题提交：[github.com/mztown/fast-link/issues](https://github.com/mztown/fast-link/issues)
 - 完整的隐私说明见 [PRIVACY.md](./PRIVACY.md)。
 - 本扩展**不收集、不上传任何用户数据**，所有匹配与转换均在本地完成。
 - 设置页中的「微软积分商城」链接为**推广链接**（URL 中含推荐码），

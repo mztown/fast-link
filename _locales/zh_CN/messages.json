@@ -32,7 +32,7 @@
     "message": "开启地址栏搜索功能。<br />地址栏搜索功能会拦截<strong>指定地址</strong>的流量进行判断磁链/网盘链接判断，并在未匹配时跳转到自定义搜索引擎进行搜索。"
   },
   "copyright": {
-    "message": "© 2026 Auto Link · 本扩展不收集、不上传任何用户数据<br />页面中的「微软积分商城」链接为推广链接，你通过它注册后作者可能获得收益"
+    "message": "© 2026 Auto Link · 本扩展不收集、不上传任何用户数据<br />页面中的「微软积分商城」链接为推广链接，你通过它注册后作者可能获得收益<br />功能请求与问题提交请访问 <a href='https://github.com/mztown/fast-link/issues' target='_blank' rel='noopener'>github.com/mztown/fast-link/issues</a>"
   },
 
   "interceptTitle": { "message": "拦截地址模板" },
