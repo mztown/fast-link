@@ -78,6 +78,17 @@ const searchInput = bindTemplateInput(
   "https://cn.bing.com/search?q=$s"
 );
 
+// Bing 积分商城推广链接：仅当兜底搜索引擎为 bing.com 时显示
+const bingRewards = document.getElementById("bingRewards");
+
+function updateBingPromo() {
+  const tpl = (searchInput.value || "").toLowerCase();
+  bingRewards.style.display = tpl.includes("bing.com") ? "block" : "none";
+}
+
+// 输入时实时判断
+searchInput.addEventListener("input", updateBingPromo);
+
 // ============================================================
 // 添加为浏览器搜索引擎
 // ============================================================
@@ -214,6 +225,7 @@ chrome.storage.sync.get(DEFAULTS, (items) => {
   }
   templateInput.value = items.matchTemplate || "";
   searchInput.value = items.searchTemplate || "";
+  updateBingPromo();
 
   // 自定义搜索引擎：由 isDefaultSE 决定开关状态，
   // 由 isDefalutSEDisabled 决定是否禁用

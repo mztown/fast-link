@@ -162,6 +162,34 @@
       .hint.error {
         color: #b91c1c;
       }
+      /* Bing 积分商城推广链接（仅当兜底搜索引擎为 bing.com 时显示） */
+      .bing-promo {
+        display: block;
+        margin-top: 8px;
+        padding: 8px 10px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 6px;
+        font-size: 12px;
+        color: #1d4ed8;
+        text-decoration: none;
+      }
+      .bing-promo:hover {
+        background: #dbeafe;
+        text-decoration: underline;
+      }
+      /* 推广标识 */
+      .promo-tag {
+        display: inline-block;
+        margin-right: 6px;
+        padding: 1px 5px;
+        background: #f59e0b;
+        color: #fff;
+        border-radius: 3px;
+        font-size: 10px;
+        line-height: 1.5;
+        vertical-align: middle;
+      }
       /* Switch */
       .switch {
         position: relative;
@@ -215,6 +243,13 @@
       }
       .save-status.show {
         opacity: 1;
+      }
+      .copyright {
+        margin-top: 20px;
+        text-align: center;
+        font-size: 11px;
+        color: #9aa3af;
+        line-height: 1.7;
       }
     </style>
   </head>
@@ -299,6 +334,17 @@
               <p class="rule-desc">
                 未匹配上述规则时跳转的搜索引擎地址，用 <code>$s</code> 表示搜索词位置。
               </p>
+              <a
+                class="bing-promo"
+                id="bingRewards"
+                href="https://rewards.bing.com/welcome?rh=VTo34eLDLJ8&amp;ref=rafsrchae"
+                target="_blank"
+                rel="noopener"
+                title="推广链接：含推荐码，你通过它注册后作者可能获得收益"
+                style="display: none"
+                ><span class="promo-tag">推广</span
+                >加入微软积分商城，获取购物、电影、加油权益</a
+              >
               <input
                 type="text"
                 id="searchTemplate"
@@ -333,6 +379,11 @@
     </div>
 
     <div class="save-status" id="saveStatus">已保存</div>
+
+    <p class="copyright">
+      © 2026 Auto Link · 本扩展不收集、不上传任何用户数据<br />
+      页面中的「微软积分商城」链接为推广链接，你通过它注册后作者可能获得收益
+    </p>
 
     <script src="convert.js"></script>
     <script src="options.js"></script>
