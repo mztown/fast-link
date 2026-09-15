@@ -52,11 +52,13 @@
         transform: translateX(-400px); /* 向左缩回，视觉上从左侧抽出 */
         opacity: 0;
       }
-      /* 右栏内容滚动框：内容超出可视高度时在框内上下滚动 */
+      /* 右栏内容滚动框：内容超出可视高度时在框内上下滚动。
+         scrollbar-gutter: stable 始终为滚动条预留空间，
+         使内容宽度在有/无滚动条时保持一致，避免元素变形 */
       .scroll-box {
         max-height: calc(100vh - 170px);
         overflow-y: auto;
-        padding-right: 4px;
+        scrollbar-gutter: stable;
       }
       .scroll-box::-webkit-scrollbar {
         width: 8px;
