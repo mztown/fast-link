@@ -1,7 +1,7 @@
 {
   "name": "Auto Link",
-  "description": "拦截 autolinreserved.publicvm.com?wd= 链接，将搜索词按规则转换为 magnet/百度网盘链接，否则跳转百度搜索",
-  "version": "2.2",
+  "description": "拦截指定地址（默认 autolinreserved.publicvm.com?wd=），按规则转换为 magnet/百度网盘链接，否则跳转搜索引擎",
+  "version": "2.3",
   "manifest_version": 3,
   "background": {
     "service_worker": "background.js"
@@ -14,17 +14,11 @@
   "permissions": [
     "storage",
     "tabs",
-    "declarativeNetRequestWithHostAccess",
-    "declarativeNetRequestFeedback"
+    "search",
+    "webNavigation"
   ],
   "host_permissions": [
     "<all_urls>"
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": ["redirect.html", "redirect.js", "convert.js"],
-      "matches": ["<all_urls>"]
-    }
   ],
   "action": {
     "default_popup": "hello.html",

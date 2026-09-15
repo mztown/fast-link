@@ -12,6 +12,8 @@ const DEFAULTS = {
   enableMagnet: true,
   enableBaidu: true,
   enableFallbackSearch: true, // 兜底跳转搜索（默认开启）
+  isDefaultSE: false, // 自定义搜索引擎开关（默认关闭）
+  isDefalutSEDisabled: true, // 该开关是否禁用（默认禁用）
 };
 
 // ============================================================
@@ -52,28 +54,26 @@ function convert(raw) {
 }
 
 // ============================================================
-// 把拦截模板转换为 DNR 正则
-// 例：https://a.com/?wd=$s  ->  ^https?://a\.com/\?wd=(.*)$
+// 把拦截模板转换为 JS 正则（用于从 URL 中提取 $s 的值）
+// 例：https://a.com/?wd=$s  ->  /^https?:\/\/a\.com\/\?wd=(.+?)$/
 // 返回 null 表示模板无效（缺少 $s）
 // ============================================================
-function templateToRegex(template) {
+function templateToJsRegex(template) {
   if (typeof template !== "string" || template.indexOf("$s") === -1) {
     return null;
   }
   const idx = template.indexOf("$s");
-  const prefix = template.slice(0, idx);
-  const suffix = template.slice(idx + 2);
 
   // 正则特殊字符转义
   const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-  let pre = esc(prefix);
+  let pre = esc(template.slice(0, idx));
   // 让 http 与 https 都能匹配
   pre = pre.replace(/^https?:\/\//, "https?://");
 
-  const post = esc(suffix);
+  const post = esc(template.slice(idx + 2));
 
-  return "^" + pre + "(.*)" + post + "$";
+  return new RegExp("^" + pre + "(.+?)" + post + "$");
 }
 
 // ============================================================

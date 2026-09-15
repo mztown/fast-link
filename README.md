@@ -15,6 +15,8 @@
 | --- | --- | --- |
 | `matchTemplate` | 拦截地址模板 | `https://autolinreserved.publicvm.com/?wd=$s` |
 | `searchTemplate` | 兜底搜索引擎模板 | `https://cn.bing.com/search?q=$s` |
+| `isDefaultSE` | 自定义搜索引擎开关 | `false` |
+| `isDefalutSEDisabled` | 上项开关是否禁用（检测到 `autolinkdefault=true` 后自动置为 `false`） | `true` |
 
 命中拦截后，按以下顺序判断搜索词：
 
@@ -47,34 +49,55 @@
 
 ## 技术实现
 
-整体分三层：**拦截 → 中间页判断 → 跳转**。
+「拦截 → 判断 → 跳转」全部在后台一次完成：
 
-1. **拦截层**（`background.js`）
-   读取设置页配置的**拦截地址模板**，把 `$s` 处替换为正则捕获组 `(.*)`、其余
-   部分做正则转义（并让 `http`/`https` 均可匹配），生成 `declarativeNetRequest`
-   动态规则，拦截匹配的主框架导航并重定向到扩展中间页
-   `chrome-extension://<id>/redirect.html?wd=<原参数>`。
+1. **拦截与判断**（`background.js`）
+   读取设置页配置的**拦截地址模板**，用 `templateToJsRegex()` 把 `$s` 处替换为
+   捕获组 `(.+?)`、其余部分做正则转义（并让 `http`/`https` 均可匹配），得到
+   一个 **JS 正则**；再用 `chrome.webNavigation.onBeforeNavigate` 监听主框架导航：
 
-2. **判断层**（`redirect.js` + `convert.js`）
-   中间页读取 `wd`，用 JS 正则完成格式判断，再按开关决定跳转目标。
+   ```
+   导航到匹配模板的地址
+     → 正则提取 $s 处的搜索词
+     → convert() 判断（百度网盘 / magnet）
+     → chrome.tabs.update(tabId, { url }) 跳转
+   ```
 
-3. **跳转**
-   命中规则 → `pan.baidu.com` / `magnet:`；未命中 → 按兜底开关跳转到
-   `searchTemplate` 配置的搜索引擎（默认 Bing），或停下并提示。
+2. **兜底跳转**
+   未命中转换规则时，若「兜底跳转搜索引擎」开启：
+   - `isDefaultSE = true` → 使用 `searchTemplate`（自定义搜索引擎）
+   - `isDefaultSE = false` → 使用 `chrome.search.query()` 走浏览器默认搜索引擎
 
-### 为什么不让 DNR 直接判断
+   （`chrome.search` 不可用时会自动回退到 `searchTemplate`）
 
-DNR 的 `regexFilter` 基于 RE2，单条正则编译后不得超过 **2KB**。实测本环境下：
+### 为什么不用 declarativeNetRequest
 
-```
-(.{23})-(.{4})                        → memoryLimitExceeded
-(.{40})                               → memoryLimitExceeded
-([a-zA-Z0-9-]{23})-([a-zA-Z0-9]{4})   → memoryLimitExceeded
-([^&#]+)([&#].*)?$                    → ✅ 通过
-```
+早期版本用 DNR 把请求重定向到扩展中间页，但存在三个硬伤：
 
-即**所有含 `{n}` 有界量词的正则都会被拒绝**，只有 `+` / `*` 无界量词的能通过。
-因此 DNR 无法完成"定长提取 + 分支"，格式判断只能交给 JS（V8 正则无此限制）。
+1. **无法执行分支判断** —— DNR 是声明式的，不能跑 JS；
+2. **正则受 2KB 限制** —— 实测本环境下所有含 `{n}` 有界量词的正则都被拒绝：
+
+   ```
+   (.{23})-(.{4})                        → memoryLimitExceeded
+   (.{40})                               → memoryLimitExceeded
+   ([a-zA-Z0-9-]{23})-([a-zA-Z0-9]{4})   → memoryLimitExceeded
+   ```
+
+   于是无法用 DNR 正则做「定长提取」；
+3. **重定向到 `chrome-extension://` 不可靠** —— 失败时请求会被**原样放行**，
+   落到目标服务器（表现就是「拦截似乎失效」）。
+
+改用 `webNavigation` + `tabs.update` 后，判断逻辑在 JS 中执行，完全不受上述限制。
+
+### 自动识别「已设为默认搜索引擎」
+
+设置页「拦截地址模板」右侧的「添加为浏览器搜索引擎」会复制形如
+`https://autolinreserved.publicvm.com/?wd=%s&autolinkdefault=true` 的地址
+（`$s` 转为浏览器所需的 `%s`，并追加 `autolinkdefault=true`）。
+
+用户把它设为浏览器默认搜索引擎后，每次地址栏搜索都会带上该参数；扩展拦截到
+`autolinkdefault=true` 时，即把 `isDefalutSEDisabled` 置为 `false`，
+从而解锁「自定义搜索引擎」开关。
 
 ### 其他
 
@@ -86,11 +109,9 @@ DNR 的 `regexFilter` 基于 RE2，单条正则编译后不得超过 **2KB**。�
 
 ```
 fast-link/
-├── manifest.json       # 扩展清单（MV3，权限 / 页面 / 中间页声明）
-├── background.js       # Service Worker：DNR 拦截规则 + 弹窗消息处理
+├── manifest.json       # 扩展清单（MV3，权限 / 页面声明）
+├── background.js       # Service Worker：URL 拦截 + 判断 + 跳转 + 弹窗消息
 ├── convert.js          # 共享配置、转换逻辑与模板转正则
-├── redirect.html       # 中间跳转页
-├── redirect.js         # 中间页判断与跳转逻辑
 ├── options.html        # 完整设置页（模板 + 开关）
 ├── options.js          # 设置页逻辑
 ├── hello.html          # 弹窗面板（输入框 + 转换按钮）
@@ -98,6 +119,8 @@ fast-link/
 ├── hello_extensions.png# 扩展图标
 └── README.md
 ```
+
+> 注：`redirect.html` / `redirect.js` 是早期中间页方案的遗留文件，现已不再使用，可自行删除。
 
 ## 安装使用
 
