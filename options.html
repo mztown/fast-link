@@ -343,12 +343,20 @@
       .save-status.show {
         opacity: 1;
       }
+      /* 左栏卡片紧凑一些，为底部法律信息留出空间 */
+      .col-left .rule {
+        padding: 12px 14px;
+        margin-bottom: 10px;
+      }
+      .col-left .rule-desc {
+        line-height: 1.45;
+      }
       .copyright {
-        margin-top: 20px;
+        margin-top: 12px;
         text-align: center;
         font-size: 11px;
         color: #9aa3af;
-        line-height: 1.7;
+        line-height: 1.6;
       }
     </style>
   </head>
@@ -357,8 +365,8 @@
     <p class="subtitle">配置转换规则、拦截地址与搜索引擎</p>
 
     <div class="layout">
-      <!-- 左栏：各转换规则开关 -->
-      <div class="col">
+      <!-- 左栏：各转换规则开关 + 法律信息 -->
+      <div class="col col-left">
         <div class="rule">
           <div class="rule-head">
             <span class="rule-title">Magnet 链接转换</span>
@@ -405,6 +413,11 @@
             不做任何跳转。
           </p>
         </div>
+
+        <p class="copyright">
+          © 2026 Auto Link · 本扩展不收集、不上传任何用户数据<br />
+          页面中的「微软积分商城」链接为推广链接，你通过它注册后作者可能获得收益
+        </p>
       </div>
 
       <!-- 右栏：兜底搜索引擎 + 拦截地址模板（仅兜底开启时展开） -->
@@ -487,11 +500,6 @@
     </div>
 
     <div class="save-status" id="saveStatus">已保存</div>
-
-    <p class="copyright">
-      © 2026 Auto Link · 本扩展不收集、不上传任何用户数据<br />
-      页面中的「微软积分商城」链接为推广链接，你通过它注册后作者可能获得收益
-    </p>
 
     <script src="convert.js"></script>
     <script src="options.js"></script>
