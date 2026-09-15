@@ -21,12 +21,11 @@
         margin: 0;
         text-align: center;
       }
-      /* 两栏布局：整体居中，右栏隐藏时左栏自动居中 */
+      /* 两栏布局：整体居中，右栏折叠时左栏自动居中 */
       .layout {
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        flex-wrap: wrap;
         gap: 24px;
         margin-top: 28px;
       }
@@ -34,6 +33,31 @@
         width: 400px;
         flex-shrink: 0;
       }
+      /* 右栏：靠宽度折叠 + 内容平移裁剪实现「从左栏下方抽出」 */
+      .col-right {
+        overflow: hidden;
+        transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+          margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .col-right.collapsed {
+        width: 0;
+        margin-left: -24px; /* 抵消 gap，保证左栏精确居中 */
+      }
+      .col-inner {
+        width: 400px; /* 固定内宽，避免折叠时内容被压扁 */
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+          opacity 0.4s ease;
+      }
+      .col-right.collapsed .col-inner {
+        transform: translateX(-400px); /* 向左缩回，视觉上从左侧抽出 */
+        opacity: 0;
+      }
+      /* 首次渲染时禁用过渡，避免初始状态变化触发动画 */
+      .no-anim,
+      .no-anim * {
+        transition: none !important;
+      }
+
       .rule {
         border: 1px solid #e5e5e5;
         border-radius: 8px;
@@ -139,7 +163,7 @@
   </head>
   <body>
     <h1>Auto Link 设置</h1>
-    <p class="subtitle">配置各转换规则与拦截地址</p>
+    <p class="subtitle">配置转换规则、拦截地址与搜索引擎</p>
 
     <div class="layout">
       <!-- 左栏：各转换规则开关 -->
@@ -178,39 +202,56 @@
 
         <div class="rule">
           <div class="rule-head">
-            <span class="rule-title">兜底跳转百度搜索</span>
+            <span class="rule-title">地址栏搜索</span>
             <label class="switch">
               <input type="checkbox" id="enableFallbackSearch" />
               <span class="slider"></span>
             </label>
           </div>
           <p class="rule-desc">
-            当搜索词<strong>不符合</strong>上述两种格式时，跳转到
-            <code>https://www.baidu.com/s?wd=搜索词</code>。
+            当搜索词<strong>不符合</strong>上述两种格式时，跳转到右侧配置的搜索引擎。
             <strong>当前默认开启</strong>。关闭时，未匹配的搜索词会在中间页停下并提示，
             不做任何跳转。
           </p>
         </div>
       </div>
 
-      <!-- 右栏：拦截地址模板（仅兜底开启时显示） -->
-      <div class="col" id="templateCard">
-        <div class="rule">
-          <div class="rule-head">
-            <span class="rule-title">拦截地址模板</span>
+      <!-- 右栏：兜底搜索引擎 + 拦截地址模板（仅兜底开启时展开） -->
+      <div class="col col-right" id="templateCard">
+        <div class="col-inner">
+          <div class="rule">
+            <div class="rule-head">
+              <span class="rule-title">兜底搜索引擎</span>
+            </div>
+            <p class="rule-desc">
+              未匹配上述规则时跳转的搜索引擎地址，用 <code>$s</code> 表示搜索词位置。
+            </p>
+            <input
+              type="text"
+              id="searchTemplate"
+              class="text-input"
+              placeholder="https://cn.bing.com/search?q=$s"
+            />
+            <div class="hint" id="searchHint"></div>
           </div>
-          <p class="rule-desc">
-            用 <code>$s</code> 表示搜索词的位置。扩展会拦截匹配该模板的链接，
-            把 <code>$s</code> 处的内容交由中间页判断：命中上述规则则跳转对应链接，
-            否则跳转百度搜索（由「兜底跳转百度搜索」开关控制）。
-          </p>
-          <input
-            type="text"
-            id="matchTemplate"
-            class="text-input"
-            placeholder="https://example.com/?wd=$s"
-          />
-          <div class="hint" id="templateHint"></div>
+
+          <div class="rule">
+            <div class="rule-head">
+              <span class="rule-title">拦截地址模板</span>
+            </div>
+            <p class="rule-desc">
+              用 <code>$s</code> 表示搜索词的位置。扩展会拦截匹配该模板的链接，
+              把 <code>$s</code> 处的内容交由中间页判断：命中上述规则则跳转对应链接，
+              否则跳转上方配置的搜索引擎。
+            </p>
+            <input
+              type="text"
+              id="matchTemplate"
+              class="text-input"
+              placeholder="https://example.com/?wd=$s"
+            />
+            <div class="hint" id="templateHint"></div>
+          </div>
         </div>
       </div>
     </div>

@@ -9,8 +9,12 @@
 
 ### 自动拦截规则
 
-拦截地址在**设置页**配置（键名 `matchTemplate`），用 `$s` 表示搜索词位置，
-默认为 `https://autolinreserved.publicvm.com/?wd=$s`。
+可在**设置页**配置两项模板（均用 `$s` 表示搜索词位置）：
+
+| 配置项 | 作用 | 默认值 |
+| --- | --- | --- |
+| `matchTemplate` | 拦截地址模板 | `https://autolinreserved.publicvm.com/?wd=$s` |
+| `searchTemplate` | 兜底搜索引擎模板 | `https://cn.bing.com/search?q=$s` |
 
 命中拦截后，按以下顺序判断搜索词：
 
@@ -18,7 +22,7 @@
 | --- | --- | --- |
 | 28 位百度网盘分享码<br/>如 `1W6PUbukIFsXCCEBKuGuKdg-n6g3` | 前 23 位 `[a-zA-Z0-9-]`，倒数第 5 位 `-`，后 4 位 `[a-zA-Z0-9]` | `https://pan.baidu.com/s/<23位>?pwd=<4位>` |
 | 40 位 BT 哈希<br/>如 `abc123...abc1`（共 40 位） | 匹配 `[a-zA-Z0-9]{40}` | `magnet:?xt=urn:btih:<哈希>` |
-| 其他任意搜索词 | 兜底（**默认开启**，可在设置页关闭） | `https://www.baidu.com/s?wd=<搜索词>` |
+| 其他任意搜索词 | 兜底（**默认开启**，可在设置页关闭） | 由 `searchTemplate` 决定，默认 `https://cn.bing.com/search?q=<搜索词>` |
 
 ### 手动转换
 
@@ -55,7 +59,8 @@
    中间页读取 `wd`，用 JS 正则完成格式判断，再按开关决定跳转目标。
 
 3. **跳转**
-   命中规则 → `pan.baidu.com` / `magnet:`；未命中 → 按兜底开关跳百度搜索或停下。
+   命中规则 → `pan.baidu.com` / `magnet:`；未命中 → 按兜底开关跳转到
+   `searchTemplate` 配置的搜索引擎（默认 Bing），或停下并提示。
 
 ### 为什么不让 DNR 直接判断
 
@@ -74,7 +79,8 @@ DNR 的 `regexFilter` 基于 RE2，单条正则编译后不得超过 **2KB**。�
 ### 其他
 
 - 手动转换复用同一套 `convert.js`，弹窗经 `chrome.runtime.onMessage` 调用，由 `chrome.tabs.create()` 打开。
-- 所有配置通过 `chrome.storage.sync` 持久化，模板变更后实时重建 DNR 规则。
+- 所有配置（`matchTemplate`、`searchTemplate`、各开关）通过 `chrome.storage.sync` 持久化；
+  拦截模板变更后实时重建 DNR 规则。
 
 ## 项目结构
 
@@ -98,18 +104,18 @@ fast-link/
 1. 打开 Chrome，进入扩展管理页 `chrome://extensions/`。
 2. 打开右上角「开发者模式」。
 3. 点击「加载已解压的扩展程序」，选择本项目目录 `fast-link`。
-4. 进入**设置页**，在「拦截地址模板」中填写要拦截的地址，用 `$s` 表示搜索词位置
-   （默认 `https://autolinreserved.publicvm.com/?wd=$s`）。
+4. 进入**设置页**：
+   - 左栏可开关「Magnet 链接转换」「百度网盘链接转换」「兜底跳转搜索引擎」；
+   - 右栏（仅在兜底开关开启时展开）可配置「兜底搜索引擎」与「拦截地址模板」，
+     两者均用 `$s` 表示搜索词位置。
 5. **自动拦截**：在地址栏访问匹配模板的链接，例如
    `https://autolinreserved.publicvm.com/?wd=1W6PUbukIFsXCCEBKuGuKdg-n6g3`，
-   扩展会判断并跳转。
+   扩展会判断并跳转；不符合格式的则跳转到配置的搜索引擎。
 6. **手动转换**：点击工具栏 Auto Link 图标，在弹窗输入框**粘贴** 40 位 BT 哈希或
    28 位百度分享码，点击「转换并打开」（或直接按回车）。
-7. 设置页统一管理「Magnet 链接转换」「百度网盘链接转换」「兜底跳转百度搜索」开关，
-   开关同时作用于自动拦截与手动转换。
 
 > 提示：若修改了代码，需在 `chrome://extensions/` 中点击该扩展的「刷新」按钮重新加载。
 
 ## 配置持久化
 
-拦截地址模板与各开关均通过 `chrome.storage.sync` 保存。若 Chrome 开启了同步，配置还会跨设备同步。
+拦截地址模板、兜底搜索引擎与各开关均通过 `chrome.storage.sync` 保存。若 Chrome 开启了同步，配置还会跨设备同步。

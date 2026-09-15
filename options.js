@@ -1,4 +1,4 @@
-// 设置页面逻辑：读取并保存开关与拦截地址模板
+// 设置页面逻辑：读取并保存开关与各类模板
 // DEFAULTS 来自 convert.js（已在本页 <script> 中引入）
 
 const SWITCH_KEYS = ["enableMagnet", "enableBaidu", "enableFallbackSearch"];
@@ -10,8 +10,6 @@ for (const key of SWITCH_KEYS) {
 }
 
 const templateCard = document.getElementById("templateCard");
-const templateInput = document.getElementById("matchTemplate");
-const templateHint = document.getElementById("templateHint");
 const saveStatus = document.getElementById("saveStatus");
 
 let saveTimer = null;
@@ -22,12 +20,45 @@ function flashSaved() {
   saveTimer = setTimeout(() => saveStatus.classList.remove("show"), 1500);
 }
 
-// 拦截地址模板仅在「兜底跳转百度搜索」开启时显示
+// 右栏（搜索引擎 / 拦截地址模板）仅在「兜底跳转搜索引擎」开启时展开
+// 用 collapsed 类驱动宽度折叠 + 内容平移的动画
 function updateTemplateVisibility() {
-  templateCard.style.display = switches.enableFallbackSearch.checked
-    ? ""
-    : "none";
+  templateCard.classList.toggle(
+    "collapsed",
+    !switches.enableFallbackSearch.checked
+  );
 }
+
+// 模板输入通用绑定：失焦或回车时保存，校验必须含 $s
+function bindTemplateInput(inputId, hintId, key, example) {
+  const input = document.getElementById(inputId);
+  const hint = document.getElementById(hintId);
+  input.addEventListener("change", () => {
+    const value = input.value.trim();
+    if (!value.includes("$s")) {
+      hint.textContent = "模板必须包含 $s 占位符，例如 " + example;
+      hint.className = "hint error";
+      return;
+    }
+    hint.textContent = "";
+    hint.className = "hint";
+    chrome.storage.sync.set({ [key]: value }, flashSaved);
+  });
+  return input;
+}
+
+const templateInput = bindTemplateInput(
+  "matchTemplate",
+  "templateHint",
+  "matchTemplate",
+  "https://example.com/?wd=$s"
+);
+const searchInput = bindTemplateInput(
+  "searchTemplate",
+  "searchHint",
+  "searchTemplate",
+  "https://cn.bing.com/search?q=$s"
+);
 
 // 加载已保存的配置
 chrome.storage.sync.get(DEFAULTS, (items) => {
@@ -35,7 +66,16 @@ chrome.storage.sync.get(DEFAULTS, (items) => {
     switches[key].checked = !!items[key];
   }
   templateInput.value = items.matchTemplate || "";
+  searchInput.value = items.searchTemplate || "";
+
+  // 初始定位不播放动画：先禁用过渡，定位后再恢复
+  document.body.classList.add("no-anim");
   updateTemplateVisibility();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.body.classList.remove("no-anim");
+    });
+  });
 });
 
 // ---- 开关：变化即保存 ----
@@ -51,17 +91,3 @@ function persistSwitches() {
 for (const key of SWITCH_KEYS) {
   switches[key].addEventListener("change", persistSwitches);
 }
-
-// ---- 模板：失焦或回车时保存，并校验必须含 $s ----
-templateInput.addEventListener("change", () => {
-  const value = templateInput.value.trim();
-  if (!value.includes("$s")) {
-    templateHint.textContent =
-      "模板必须包含 $s 占位符，例如 https://example.com/?wd=$s";
-    templateHint.className = "hint error";
-    return;
-  }
-  templateHint.textContent = "";
-  templateHint.className = "hint";
-  chrome.storage.sync.set({ matchTemplate: value }, flashSaved);
-});

@@ -4,12 +4,14 @@
 // ============================================================
 
 // 配置项默认值（存储在 chrome.storage.sync）
-// matchTemplate：拦截地址模板，用 $s 表示搜索词位置
+// matchTemplate ：拦截地址模板，用 $s 表示搜索词位置
+// searchTemplate：兜底搜索引擎模板，用 $s 表示搜索词位置
 const DEFAULTS = {
   matchTemplate: "https://autolinreserved.publicvm.com/?wd=$s",
+  searchTemplate: "https://cn.bing.com/search?q=$s",
   enableMagnet: true,
   enableBaidu: true,
-  enableFallbackSearch: true, // 兜底跳转百度搜索（默认开启）
+  enableFallbackSearch: true, // 兜底跳转搜索（默认开启）
 };
 
 // ============================================================
@@ -72,4 +74,17 @@ function templateToRegex(template) {
   const post = esc(suffix);
 
   return "^" + pre + "(.*)" + post + "$";
+}
+
+// ============================================================
+// 用 $s 占位符构造目标链接（用于兜底搜索引擎模板）
+// 例：https://cn.bing.com/search?q=$s + "天气"
+//     -> https://cn.bing.com/search?q=%E5%A4%A9%E6%B0%94
+// 返回 null 表示模板无效（缺少 $s）
+// ============================================================
+function applyKeywordTemplate(template, keyword) {
+  if (typeof template !== "string" || template.indexOf("$s") === -1) {
+    return null;
+  }
+  return template.split("$s").join(encodeURIComponent(keyword || ""));
 }
