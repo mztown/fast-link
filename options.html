@@ -516,7 +516,7 @@
             </label>
           </div>
           <p class="rule-desc">
-            开启地址栏搜索功能。
+            开启地址栏搜索功能。<br />
             地址栏搜索功能会拦截<strong>指定地址</strong>的流量进行判断磁链/网盘链接判断，并在未匹配时跳转到自定义搜索引擎进行搜索。
           </p>
         </div>
@@ -533,6 +533,28 @@
           <div class="scroll-box">
             <div class="rule">
               <div class="rule-head">
+                <span class="rule-title">拦截地址模板</span>
+                <a class="link" id="addAsSearchEngine">添加为浏览器搜索引擎</a>
+              </div>
+              <p class="rule-desc">
+                <strong>插件拦截的地址模板。</strong>按模板格式访问该地址会被插件拦截，如果属于磁链或网盘链接，会直接跳转到对应地址。除此之外的情况会被跳转到浏览器默认搜索引擎进行搜索。<br />
+                可利用浏览器地址栏记忆方便跳转，或<strong>点击上方链接复制默认拦截模板, 然后将默认拦截模板设置为默认搜索引擎。</strong>启用后在浏览器地址栏直接访问磁链hash或网盘链接地址都可直接访问，且其余内容可正常进入搜索，获得最佳体验<br />
+                将默认地址设置为浏览器默认搜索引擎后，你可以在这里更改想要监听的地址。<strong>可以使用任何合法的URL格式, 即使并不真是存在的站点也可以! </strong><br />
+                注意在此处调整地址后, 你需要重新设置浏览器默认搜索引擎为新的拦截地址模板才能生效。<br />
+                用 <code>$s</code> 表示搜索词的位置。
+              </p>
+              <input
+                type="text"
+                id="matchTemplate"
+                class="text-input"
+                placeholder="https://example.com/?wd=$s"
+              />
+              <div class="hint" id="templateHint"></div>
+              <div class="guide" id="seGuide"></div>
+            </div>
+
+            <div class="rule">
+              <div class="rule-head">
                 <span class="rule-title">自定义搜索引擎</span>
                 <label class="switch">
                   <input type="checkbox" id="isDefaultSE" />
@@ -540,9 +562,8 @@
                 </label>
               </div>
               <p class="rule-desc">
-                将下方「拦截地址模板」的地址设为浏览器的<strong>默认搜索引擎</strong>后，
-                即可启用此选项，搜索时会使用下方自定义的默认搜索引擎；
-                否则需要手动把该地址输入地址栏才能进行搜索。
+                将上方「拦截地址模板」的地址设为浏览器的<strong>默认搜索引擎</strong>后，
+                即可启用此选项，搜索时会使用下方自定义的默认搜索引擎。
               </p>
             </div>
 
@@ -586,26 +607,6 @@
                   <div class="hint" id="searchHint"></div>
                 </div>
               </div>
-            </div>
-
-            <div class="rule">
-              <div class="rule-head">
-                <span class="rule-title">拦截地址模板</span>
-                <a class="link" id="addAsSearchEngine">添加为浏览器搜索引擎</a>
-              </div>
-              <p class="rule-desc">
-                用 <code>$s</code> 表示搜索词的位置。扩展会拦截匹配该模板的链接，
-                把 <code>$s</code> 处的内容交由扩展判断：命中上述规则则跳转对应链接，
-                否则跳转上方配置的搜索引擎。
-              </p>
-              <input
-                type="text"
-                id="matchTemplate"
-                class="text-input"
-                placeholder="https://example.com/?wd=$s"
-              />
-              <div class="hint" id="templateHint"></div>
-              <div class="guide" id="seGuide"></div>
             </div>
           </div>
         </div>
